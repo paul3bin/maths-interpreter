@@ -4,13 +4,14 @@ from enum import Enum
 
 # TokenType class declaration
 class TokenType(Enum):
-    INTEGER = 0
-    PLUS = 1
-    MINUS = 2
-    MULTIPLY = 3
-    DIVIDE = 4
-    LEFT_PARENTHESIS = 5
-    RIGHT_PARENTHESIS = 6
+    INTEGER = "INTEGER"
+    PLUS = "PLUS"
+    MINUS = "MINUS"
+    MULTIPLY = "MULTIPLY"
+    DIVIDE = "DIVIDE"
+    LEFT_PARENTHESIS = "LEFT_PARENTHESIS"
+    RIGHT_PARENTHESIS = "RIGHT_PARENTHESIS"
+    FLOAT = "FLOAT"
 
 
 # Token class declaration
