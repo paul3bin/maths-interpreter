@@ -19,7 +19,7 @@ class Lexer:
         Rserved constructor method
         """
         # creating a list of characters from the string
-        self.__string_character_list = list(input_string)
+        self.__string_character_list = list(input_string)  # 1+2 -> ['1', '+', '2']
         self.__tokens = []
 
     def generate_tokens(self):
@@ -40,6 +40,9 @@ class Lexer:
             if character.isdigit():
                 number_string += character
 
+            elif character == ".":
+                number_string += character
+
             # checking if current character is one of the following characters:
             # +, -, *, /, (, )
             elif character in ["+", "-", "/", "*", "(", ")"]:
@@ -48,8 +51,20 @@ class Lexer:
                 # If yes, append the integer token to the token list and assign empty string to the number_string variable.
                 # If no, move on to identifying the characters and append to tokens list.
                 if number_string:
-                    self.__tokens.append(Token(TokenType.INTEGER, int(number_string)))
-                    number_string = ""
+                    if "." in number_string:
+                        if len(number_string) > 1:
+                            self.__tokens.append(
+                                Token(TokenType.FLOAT, float(number_string))
+                            )
+                            number_string = ""
+                        else:
+                            raise Exception("Invalid expression.")
+
+                    else:
+                        self.__tokens.append(
+                            Token(TokenType.INTEGER, int(number_string))
+                        )
+                        number_string = ""
 
                 if character == "+":
                     self.__tokens.append(Token(TokenType.PLUS, "'+'"))
