@@ -79,9 +79,17 @@ class Lexer:
                 elif character == ")":
                     self.__tokens.append(Token(TokenType.RIGHT_PARENTHESIS, "')'"))
 
-        # if number string is not empty once loop ends add the integer token to the list
+        # if number string is not empty once loop ends,then add the integer token to the list
         if number_string:
-            self.__tokens.append(Token(TokenType.INTEGER, int(number_string)))
+            if "." in number_string:
+                if len(number_string) > 1:
+                    self.__tokens.append(Token(TokenType.FLOAT, float(number_string)))
+                    number_string = ""
+                else:
+                    raise Exception("Invalid expression.")
+
+            else:
+                self.__tokens.append(Token(TokenType.INTEGER, int(number_string)))
 
     def get_tokens(self) -> list:
         """
