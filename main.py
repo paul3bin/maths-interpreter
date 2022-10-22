@@ -12,4 +12,4 @@ while True:
 
     tokens = lexer.get_tokens()
 
-    print(tokens)
+    print(tokens, f"; Number of tokens: {len(tokens)}")

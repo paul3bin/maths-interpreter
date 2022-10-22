@@ -1,7 +1,9 @@
+"""
+The token identified so far: integers, floats, operands(+, - , * , /) and bracketts '()'
+"""
+
 # TO ADD:
-# 1) ADD FLOATS
-# 2) ADD NEGATIVE NUMBERS
-# 3) POWER TO FUNTIONALITY
+# 1) ADD NEGATIVE NUMBERS
 
 # 4)VARIABLE DECLARATION + ADD VARIABLES TOGETHER
 
@@ -45,7 +47,7 @@ class Lexer:
 
             # checking if current character is one of the following characters:
             # +, -, *, /, (, )
-            elif character in ["+", "-", "/", "*", "(", ")"]:
+            elif character in ["+", "-", "/", "*", "(", ")", "^"]:
 
                 # checking if numbers are present in the number string.
                 # If yes, append the integer token to the token list and assign empty string to the number_string variable.
@@ -78,6 +80,8 @@ class Lexer:
                     self.__tokens.append(Token(TokenType.LEFT_PARENTHESIS, "'('"))
                 elif character == ")":
                     self.__tokens.append(Token(TokenType.RIGHT_PARENTHESIS, "')'"))
+                elif character == "^":
+                    self.__tokens.append(Token(TokenType.CARET, "'^'"))
 
         # if number string is not empty once loop ends,then add the integer token to the list
         if number_string:

@@ -12,6 +12,7 @@ class TokenType(Enum):
     LEFT_PARENTHESIS = "LEFT_PARENTHESIS"
     RIGHT_PARENTHESIS = "RIGHT_PARENTHESIS"
     FLOAT = "FLOAT"
+    CARET = "CARET"
 
 
 # Token class declaration
