@@ -1,11 +1,10 @@
 """
-The token identified so far: integers, floats, operands(+, - , * , /) and bracketts '()'
+The token identified so far: integers, floats, operands(+, - , * , /, ^) and bracketts '()'
 """
 
 # TO ADD:
-# 1) ADD NEGATIVE NUMBERS
-
-# 4)VARIABLE DECLARATION + ADD VARIABLES TOGETHER
+# 1) ADD NEGATIVE NUMBERS (Done, testing required.)
+# 2)VARIABLE DECLARATION + ADD VARIABLES TOGETHER
 
 # ------- DEADLINE FOR FUNCTIONALITY
 
@@ -70,16 +69,43 @@ class Lexer:
 
                 if character == "+":
                     self.__tokens.append(Token(TokenType.PLUS, "'+'"))
+
                 elif character == "-":
-                    self.__tokens.append(Token(TokenType.MINUS, "'-'"))
+                    # if token list is empty and,
+                    # the first character encountered is minus
+                    # then the "-" character is for a negative number.
+                    if not self.__tokens:
+                        number_string += character
+
+                    # if the last token in token list
+                    # is one of the TokenTypes other than INTEGER and FLOAT
+                    # then the "-" character is for a negative number.
+                    elif self.__tokens[-1].type in [
+                        TokenType.MULTIPLY,
+                        TokenType.PLUS,
+                        TokenType.DIVIDE,
+                        TokenType.MINUS,
+                        TokenType.LEFT_PARENTHESIS,
+                        TokenType.RIGHT_PARENTHESIS,
+                        TokenType.CARET,
+                    ]:
+                        number_string += character
+
+                    else:
+                        self.__tokens.append(Token(TokenType.MINUS, "'-'"))
+
                 elif character == "*":
                     self.__tokens.append(Token(TokenType.MULTIPLY, "'*'"))
+
                 elif character == "/":
                     self.__tokens.append(Token(TokenType.DIVIDE, "'/'"))
+
                 elif character == "(":
                     self.__tokens.append(Token(TokenType.LEFT_PARENTHESIS, "'('"))
+
                 elif character == ")":
                     self.__tokens.append(Token(TokenType.RIGHT_PARENTHESIS, "')'"))
+
                 elif character == "^":
                     self.__tokens.append(Token(TokenType.CARET, "'^'"))
 
