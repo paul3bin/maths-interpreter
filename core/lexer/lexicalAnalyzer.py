@@ -33,6 +33,10 @@ class Lexer:
         # iterating through all the chacters present in the input string list
         for character in self.__string_character_list:
 
+            # Checking if characters present in the input string are allowed or not
+            if character not in ALLOWED_CHARACTERS:
+                raise Exception("Invalid character(s).")
+
             # skipping the whitespace characters
             if character in WHITESPACE:
                 continue
