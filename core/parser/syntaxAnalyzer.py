@@ -63,7 +63,7 @@ class Parser:
         """
         result = self.factor()
 
-        if self.current_token and self.current_token.type in (
+        while self.current_token and self.current_token.type in (
             TokenType.MULTIPLY,
             TokenType.DIVIDE,
         ):
@@ -80,7 +80,7 @@ class Parser:
         """
         result = self.term()
 
-        if self.current_token and self.current_token.type in (
+        while self.current_token and self.current_token.type in (
             TokenType.PLUS,
             TokenType.MINUS,
         ):
@@ -93,6 +93,7 @@ class Parser:
     def parse(self):
         result = self.expression()
 
+        # checking if opened Parentheses are closed
         if self.parenthesis_count % 2 != 0:
             raise Exception("Missing parenthesis")
 
