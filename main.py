@@ -17,4 +17,4 @@ while True:
 
     ast = parser.parse()
 
-    print(ast)
+    print(ast if ast else "")

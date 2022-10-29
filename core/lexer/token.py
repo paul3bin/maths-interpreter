@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from enum import Enum
 
 
@@ -13,10 +12,10 @@ class TokenType(Enum):
     RIGHT_PARENTHESIS = "RIGHT_PARENTHESIS"
     FLOAT = "FLOAT"
     CARET = "CARET"
+    END = "END"
 
 
 # Token class declaration
-@dataclass
 class Token:
     def __init__(self, type, value=None):
         self.type: TokenType = type

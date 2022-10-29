@@ -45,6 +45,9 @@ class Parser:
         """
         token = self.current_token
 
+        if self.current_token.type == TokenType.END:
+            return
+
         if token.type in (TokenType.INTEGER, TokenType.FLOAT):
             self.get_next_token()
             return OperandNode(token)
@@ -63,9 +66,14 @@ class Parser:
         """
         result = self.factor()
 
-        while self.current_token and self.current_token.type in (
-            TokenType.MULTIPLY,
-            TokenType.DIVIDE,
+        while (
+            self.current_token.type != TokenType.END
+            and self.current_token
+            and self.current_token.type
+            in (
+                TokenType.MULTIPLY,
+                TokenType.DIVIDE,
+            )
         ):
             operator = self.current_token
             self.get_next_token()
@@ -80,9 +88,14 @@ class Parser:
         """
         result = self.term()
 
-        while self.current_token and self.current_token.type in (
-            TokenType.PLUS,
-            TokenType.MINUS,
+        while (
+            self.current_token.type != TokenType.END
+            and self.current_token
+            and self.current_token.type
+            in (
+                TokenType.PLUS,
+                TokenType.MINUS,
+            )
         ):
             operator = self.current_token
             self.get_next_token()
