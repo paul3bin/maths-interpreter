@@ -1,6 +1,6 @@
 from core.lexer.token import Token, TokenType
 
-from .nodes import OperatorNode, OperandNode
+from .nodes import OperandNode, OperatorNode
 
 """
 BNF :-
