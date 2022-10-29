@@ -5,6 +5,7 @@ Version: 1.01
 Version Date: 19/10/2022
 """
 from core.lexer.lexicalAnalyzer import Lexer
+from core.parser.syntaxAnalyzer import Parser
 
 while True:
     input_string = input("Enter expression >> ")
@@ -12,4 +13,8 @@ while True:
 
     tokens = lexer.get_tokens()
 
-    print(tokens, f"; Number of tokens: {len(tokens)}")
+    parser = Parser(tokens)
+
+    ast = parser.parse()
+
+    print(ast)
