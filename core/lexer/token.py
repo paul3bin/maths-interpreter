@@ -18,8 +18,9 @@ class TokenType(Enum):
 # Token class declaration
 @dataclass
 class Token:
-    type: TokenType
-    value: any = None
+    def __init__(self, type, value=None):
+        self.type: TokenType = type
+        self.value: any = value
 
     # string representation of a token.
     def __str__(self):
