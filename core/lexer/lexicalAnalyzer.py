@@ -21,7 +21,9 @@ class Lexer:
         Reserved constructor method
         """
         # creating a list of characters from the string
-        self.__string_character_list = list(input_string)  # 1+2 -> ['1', '+', '2']
+        self.__string_character_list = list(
+            input_string
+        )  # 12+24  -> ['1', '2', '+', '2', '4']
         self.__tokens = []
 
     def generate_tokens(self):
@@ -77,25 +79,24 @@ class Lexer:
                     if character == "+":
                         # if token list is empty and,
                         # the first character encountered is plus
-                        # then skip and go to next character
+                        # then raise an exception
                         if not self.__tokens:
                             continue
 
                         # if the last token in token list
                         # is one of the TokenTypes other than INTEGER and FLOAT
-                        # then the "-" character is for a negative number.
+                        # then raise an exception
                         elif self.__tokens[-1].type in [
                             TokenType.MULTIPLY,
                             TokenType.PLUS,
                             TokenType.DIVIDE,
                             TokenType.MINUS,
                             TokenType.LEFT_PARENTHESIS,
-                            TokenType.RIGHT_PARENTHESIS,
                             TokenType.CARET,
                         ]:
                             continue
-
-                        self.__tokens.append(Token(TokenType.PLUS, "'+'"))
+                        else:
+                            self.__tokens.append(Token(TokenType.PLUS, "'+'"))
 
                     elif character == "-":
                         # if token list is empty and,
@@ -113,7 +114,6 @@ class Lexer:
                             TokenType.DIVIDE,
                             TokenType.MINUS,
                             TokenType.LEFT_PARENTHESIS,
-                            TokenType.RIGHT_PARENTHESIS,
                             TokenType.CARET,
                         ]:
                             number_string += character
@@ -122,10 +122,48 @@ class Lexer:
                             self.__tokens.append(Token(TokenType.MINUS, "'-'"))
 
                     elif character == "*":
-                        self.__tokens.append(Token(TokenType.MULTIPLY, "'*'"))
+                        # if token list is empty and,
+                        # the first character encountered is plus
+                        # then raise an exception
+                        if not self.__tokens:
+                            raise Exception("Invalid expression")
+
+                        # if the last token in token list
+                        # is one of the TokenTypes other than INTEGER and FLOAT
+                        # then raise an exception
+                        elif self.__tokens[-1].type in [
+                            TokenType.MULTIPLY,
+                            TokenType.PLUS,
+                            TokenType.DIVIDE,
+                            TokenType.MINUS,
+                            TokenType.LEFT_PARENTHESIS,
+                            TokenType.CARET,
+                        ]:
+                            raise Exception("Invalid expression")
+                        else:
+                            self.__tokens.append(Token(TokenType.MULTIPLY, "'*'"))
 
                     elif character == "/":
-                        self.__tokens.append(Token(TokenType.DIVIDE, "'/'"))
+                        # if token list is empty and,
+                        # the first character encountered is plus
+                        # then raise an exception
+                        if not self.__tokens:
+                            raise Exception("Invalid expression")
+
+                        # if the last token in token list
+                        # is one of the TokenTypes other than INTEGER and FLOAT
+                        # then raise an exception
+                        elif self.__tokens[-1].type in [
+                            TokenType.MULTIPLY,
+                            TokenType.PLUS,
+                            TokenType.DIVIDE,
+                            TokenType.MINUS,
+                            TokenType.LEFT_PARENTHESIS,
+                            TokenType.CARET,
+                        ]:
+                            raise Exception("Invalid expression")
+                        else:
+                            self.__tokens.append(Token(TokenType.DIVIDE, "'/'"))
 
                     elif character == "(":
                         self.__tokens.append(Token(TokenType.LEFT_PARENTHESIS, "'('"))
@@ -134,7 +172,27 @@ class Lexer:
                         self.__tokens.append(Token(TokenType.RIGHT_PARENTHESIS, "')'"))
 
                     elif character == "^":
-                        self.__tokens.append(Token(TokenType.CARET, "'^'"))
+                        # if token list is empty and,
+                        # the first character encountered is plus
+                        # then raise an exception
+                        if not self.__tokens:
+                            raise Exception("Invalid expression")
+
+                        # if the last token in token list
+                        # is one of the TokenTypes other than INTEGER and FLOAT
+                        # then raise an exception
+                        elif self.__tokens[-1].type in [
+                            TokenType.MULTIPLY,
+                            TokenType.PLUS,
+                            TokenType.DIVIDE,
+                            TokenType.MINUS,
+                            TokenType.LEFT_PARENTHESIS,
+                            TokenType.RIGHT_PARENTHESIS,
+                            TokenType.CARET,
+                        ]:
+                            raise Exception("Invalid expression")
+                        else:
+                            self.__tokens.append(Token(TokenType.CARET, "'^'"))
 
             # if number string is not empty once loop ends,then add the integer token to the list
             if number_string:
