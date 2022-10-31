@@ -75,6 +75,26 @@ class Lexer:
                             number_string = ""
 
                     if character == "+":
+                        # if token list is empty and,
+                        # the first character encountered is plus
+                        # then skip and go to next character
+                        if not self.__tokens:
+                            continue
+
+                        # if the last token in token list
+                        # is one of the TokenTypes other than INTEGER and FLOAT
+                        # then the "-" character is for a negative number.
+                        elif self.__tokens[-1].type in [
+                            TokenType.MULTIPLY,
+                            TokenType.PLUS,
+                            TokenType.DIVIDE,
+                            TokenType.MINUS,
+                            TokenType.LEFT_PARENTHESIS,
+                            TokenType.RIGHT_PARENTHESIS,
+                            TokenType.CARET,
+                        ]:
+                            continue
+
                         self.__tokens.append(Token(TokenType.PLUS, "'+'"))
 
                     elif character == "-":
