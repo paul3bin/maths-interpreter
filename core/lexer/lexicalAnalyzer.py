@@ -12,7 +12,7 @@ The token identified so far: integers, floats, operands(+, - , * , /, ^) and bra
 from .token import Token, TokenType
 
 WHITESPACE = " \t"
-ALLOWED_CHARACTERS = "0123456789+-/*() \n\t"
+ALLOWED_CHARACTERS = "0123456789+-/*()^ \n\t"
 
 
 class Lexer:
