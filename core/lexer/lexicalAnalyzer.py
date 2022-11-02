@@ -12,7 +12,7 @@ The token identified so far: integers, floats, operands(+, - , * , /, ^) and bra
 from .token import Token, TokenType
 
 WHITESPACE = " \t"
-ALLOWED_CHARACTERS = "0123456789+-/*()^ \n\t"
+ALLOWED_CHARACTERS = "0123456789+-/*()^. \n\t"
 
 
 class Lexer:
@@ -95,31 +95,32 @@ class Lexer:
                             TokenType.CARET,
                         ]:
                             continue
+
                         else:
                             self.__tokens.append(Token(TokenType.PLUS, "'+'"))
 
                     elif character == "-":
-                        # if token list is empty and,
-                        # the first character encountered is minus
-                        # then the "-" character is for a negative number.
-                        if not self.__tokens:
-                            number_string += character
+                        # # if token list is empty and,
+                        # # the first character encountered is minus
+                        # # then the "-" character is for a negative number.
+                        # if not self.__tokens:
+                        #     number_string += character
 
-                        # if the last token in token list
-                        # is one of the TokenTypes other than INTEGER and FLOAT
-                        # then the "-" character is for a negative number.
-                        elif self.__tokens[-1].type in [
-                            TokenType.MULTIPLY,
-                            TokenType.PLUS,
-                            TokenType.DIVIDE,
-                            TokenType.MINUS,
-                            TokenType.LEFT_PARENTHESIS,
-                            TokenType.CARET,
-                        ]:
-                            number_string += character
+                        # # if the last token in token list
+                        # # is one of the TokenTypes other than INTEGER and FLOAT
+                        # # then the "-" character is for a negative number.
+                        # elif self.__tokens[-1].type in [
+                        #     TokenType.MULTIPLY,
+                        #     TokenType.PLUS,
+                        #     TokenType.DIVIDE,
+                        #     TokenType.MINUS,
+                        #     TokenType.LEFT_PARENTHESIS,
+                        #     TokenType.CARET,
+                        # ]:
+                        #     number_string += character
 
-                        else:
-                            self.__tokens.append(Token(TokenType.MINUS, "'-'"))
+                        # else:
+                        self.__tokens.append(Token(TokenType.MINUS, "'-'"))
 
                     elif character == "*":
                         # if token list is empty and,
@@ -140,6 +141,7 @@ class Lexer:
                             TokenType.CARET,
                         ]:
                             raise Exception("Invalid expression")
+
                         else:
                             self.__tokens.append(Token(TokenType.MULTIPLY, "'*'"))
 

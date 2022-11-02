@@ -77,7 +77,7 @@ class Parser:
         ):
             operator = self.current_token
             self.get_next_token()
-            result = OperatorNode(result, operator.type.name, self.factor())
+            result = OperatorNode(result, operator, self.factor())
 
         return result
 
@@ -99,11 +99,14 @@ class Parser:
         ):
             operator = self.current_token
             self.get_next_token()
-            result = OperatorNode(result, operator.type.name, self.term())
+            result = OperatorNode(result, operator, self.term())
 
         return result
 
     def parse(self):
+        """
+        Parses the tokens list and returns an AST (Abstract Syntax Tree)
+        """
         result = self.expression()
 
         # checking if opened Parentheses are closed
