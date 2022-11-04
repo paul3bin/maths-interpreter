@@ -1,8 +1,8 @@
 """
 Authors: Max James, Christopher Gavey, Ebin Paul, Aswin, Soniya
 Program: Mathematical visualisation software interpreter
-Version: 1.02
-Version Date: 02/11/2022
+Version: 1.03
+Version Date: 04/11/2022
 """
 from core.interpreter import Interpreter
 from core.lexer.lexicalAnalyzer import Lexer

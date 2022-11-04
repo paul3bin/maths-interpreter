@@ -3,10 +3,7 @@ The token identified so far: integers, floats, operands(+, - , * , /, ^) and bra
 """
 
 # TO ADD:
-# 1) ADD NEGATIVE NUMBERS (Done, testing required.)
-# 2)VARIABLE DECLARATION + ADD VARIABLES TOGETHER
-
-# ------- DEADLINE FOR FUNCTIONALITY
+# 1)VARIABLE DECLARATION + ADD VARIABLES TOGETHER
 
 
 from .token import Token, TokenType

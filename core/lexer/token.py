@@ -1,8 +1,11 @@
 from enum import Enum
 
 
-# TokenType class declaration
 class TokenType(Enum):
+    """
+    TokenType class declaration
+    """
+
     INTEGER = "INTEGER"
     PLUS = "PLUS"
     MINUS = "MINUS"
@@ -15,8 +18,11 @@ class TokenType(Enum):
     END = "END"
 
 
-# Token class declaration
 class Token:
+    """
+    Token class declaration
+    """
+
     def __init__(self, type, value=None):
         self.type: TokenType = type
         self.value: any = value

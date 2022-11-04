@@ -48,10 +48,12 @@ class Parser:
         if self.current_token.type == TokenType.END:
             return
 
+        # set the left node as NULL/NONE is the current node encountered is a unary operator.
         elif self.current_token.type in (TokenType.PLUS, TokenType.MINUS):
             self.get_next_token()
             return OperatorNode(None, token, self.term())
 
+        # return an operand node if current node is integer or float
         elif token.type in (TokenType.INTEGER, TokenType.FLOAT):
             self.get_next_token()
             return OperandNode(token)

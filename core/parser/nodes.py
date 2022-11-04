@@ -42,14 +42,21 @@ class OperatorNode:
         returns result of arithmetic operation.
         """
         if self.token.type == TokenType.PLUS:
-            if self.left_node != None:
+            # checking for unary PLUS operator
+            # if left node is none then the node is an unary operator
+            # else return the result of arithmetic PLUS operation
+            if self.left_node:
                 return (
                     self.left_node.get_node_value() + self.right_node.get_node_value()
                 )
+
             return self.right_node.get_node_value()
 
         elif self.token.type == TokenType.MINUS:
-            if self.left_node != None:
+            # checking for unary MINUS operator
+            # if left node is none then the node is an unary operator
+            # else return the result of arithmetic MINUS operation
+            if self.left_node:
                 return (
                     self.left_node.get_node_value() - self.right_node.get_node_value()
                 )
