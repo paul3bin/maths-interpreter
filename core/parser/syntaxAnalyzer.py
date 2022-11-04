@@ -48,7 +48,11 @@ class Parser:
         if self.current_token.type == TokenType.END:
             return
 
-        if token.type in (TokenType.INTEGER, TokenType.FLOAT):
+        elif self.current_token.type in (TokenType.PLUS, TokenType.MINUS):
+            self.get_next_token()
+            return OperatorNode(None, token, self.term())
+
+        elif token.type in (TokenType.INTEGER, TokenType.FLOAT):
             self.get_next_token()
             return OperandNode(token)
 

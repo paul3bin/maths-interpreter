@@ -1,7 +1,6 @@
 from core.lexer.token import Token, TokenType
 
 
-# Defining the Node
 class OperandNode:
     """
     Blueprint of a leaf node
@@ -43,10 +42,19 @@ class OperatorNode:
         returns result of arithmetic operation.
         """
         if self.token.type == TokenType.PLUS:
-            return self.left_node.get_node_value() + self.right_node.get_node_value()
+            if self.left_node != None:
+                return (
+                    self.left_node.get_node_value() + self.right_node.get_node_value()
+                )
+            return self.right_node.get_node_value()
 
         elif self.token.type == TokenType.MINUS:
-            return self.left_node.get_node_value() - self.right_node.get_node_value()
+            if self.left_node != None:
+                return (
+                    self.left_node.get_node_value() - self.right_node.get_node_value()
+                )
+
+            return -self.right_node.get_node_value()
 
         elif self.token.type == TokenType.MULTIPLY:
             return self.left_node.get_node_value() * self.right_node.get_node_value()
