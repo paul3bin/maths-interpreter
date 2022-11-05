@@ -18,8 +18,6 @@ while True:
 
     ast = parser.parse()
 
-    print(ast)
-
     interpreter = Interpreter(ast)
 
     result = interpreter.execute()
