@@ -17,8 +17,8 @@ class Parser:
         self.__tokens = tokens
         self.current_token: Token = None
         self.position = 0
-        self.get_next_token()
         self.parenthesis_count = 0
+        self.get_next_token()
 
     def get_next_token(self):
         """
