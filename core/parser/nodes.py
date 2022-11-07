@@ -69,6 +69,9 @@ class OperatorNode:
         elif self.token.type == TokenType.DIVIDE:
             return self.left_node.get_node_value() / self.right_node.get_node_value()
 
+        elif self.token.type == TokenType.CARET:
+            return self.left_node.get_node_value() ** self.right_node.get_node_value()
+
     def __str__(self):
         return f"{self.left_node} {self.token.type.name} {self.right_node}"
 

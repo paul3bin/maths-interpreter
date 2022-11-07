@@ -76,14 +76,15 @@ class Parser:
             self.current_token.type != TokenType.END
             and self.current_token
             and self.current_token.type
-            in (
-                TokenType.MULTIPLY,
-                TokenType.DIVIDE,
-            )
+            in (TokenType.MULTIPLY, TokenType.DIVIDE, TokenType.CARET)
         ):
             operator = self.current_token
             self.get_next_token()
-            result = OperatorNode(result, operator, self.factor())
+
+            if operator.type == TokenType.CARET:
+                result = OperatorNode(result, operator, self.factor())
+            else:
+                result = OperatorNode(result, operator, self.factor())
 
         return result
 
