@@ -66,26 +66,39 @@ class Parser:
             self.get_next_token()
             return result
 
-    def term(self):
-        """
-        method for parsing a term
-        term -> factor [(MULTIPLY | DIVIDE) factor]*
-        """
+    def power(self):
+        """ """
         result = self.factor()
 
         while (
             self.current_token.type != TokenType.END
             and self.current_token
-            and self.current_token.type
-            in (TokenType.MULTIPLY, TokenType.DIVIDE, TokenType.CARET)
+            and self.current_token.type == TokenType.CARET
+        ):
+
+            operator = self.current_token
+            self.get_next_token()
+
+            result = OperatorNode(result, operator, self.factor())
+
+        return result
+
+    def term(self):
+        """
+        method for parsing a term
+        term -> factor [(MULTIPLY | DIVIDE) factor]*
+        """
+        result = self.power()
+
+        while (
+            self.current_token.type != TokenType.END
+            and self.current_token
+            and self.current_token.type in (TokenType.MULTIPLY, TokenType.DIVIDE)
         ):
             operator = self.current_token
             self.get_next_token()
 
-            if operator.type == TokenType.CARET:
-                result = OperatorNode(result, operator, self.factor())
-            else:
-                result = OperatorNode(result, operator, self.factor())
+            result = OperatorNode(result, operator, self.power())
 
         return result
 
