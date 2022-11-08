@@ -5,10 +5,11 @@ from .nodes import OperandNode, OperatorNode
 """
 BNF :-
 
-    expression -> term [(PLUS | MINUS) term]*
-    term -> factor [(MULTIPLY | DIVIDE) factor]*
-    factor -> NUMBER | LEFT_PARENTHESIS expression RIGHT_PARENTHESIS
-
+    <expression> -> <term> [(+ | -) <term>]*
+    <term> -> <term> [(* | /) <power>]*
+    <power> -> <factor> ^ <power> | <factor>
+    <factor> -> <number> |  (expression) 
+    <number> -> <int> <float> | <digit>
 """
 
 
