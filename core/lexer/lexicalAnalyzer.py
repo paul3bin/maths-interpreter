@@ -1,9 +1,10 @@
 """
-The token identified so far: integers, floats, operands(+, - , * , /, ^) and bracketts '()'
-"""
+TO ADD:
 
-# TO ADD:
-# 1)VARIABLE DECLARATION + ADD VARIABLES TOGETHER
+1) VARIABLE DECLARATION
+2) Executing expressions with variables in it
+
+"""
 
 
 from .token import Token, TokenType
@@ -18,9 +19,9 @@ class Lexer:
         Reserved constructor method
         """
         # creating a list of characters from the string
-        self.__string_character_list = list(
-            input_string
-        )  # 12+24  -> ['1', '2', '+', '2', '4']
+        # eg: 12+24  -> ['1', '2', '+', '2', '4']
+        self.__character_list = list(input_string)
+
         self.__tokens = []
 
     def generate_tokens(self):
@@ -30,10 +31,10 @@ class Lexer:
         # intializing the number string as an empty string
         number_string = ""
 
-        if self.__string_character_list:
+        if self.__character_list:
 
             # iterating through all the chacters present in the input string list
-            for character in self.__string_character_list:
+            for character in self.__character_list:
 
                 # Checking if characters present in the input string are allowed or not
                 if character not in ALLOWED_CHARACTERS:

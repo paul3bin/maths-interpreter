@@ -19,9 +19,9 @@ class Parser:
         self.current_token: Token = None
         self.position = 0
         self.parenthesis_count = 0
-        self.get_next_token()
+        self.next_token()
 
-    def get_next_token(self):
+    def next_token(self):
         """
         assigns token at position value to the current token
         """
@@ -51,19 +51,19 @@ class Parser:
 
         # set the left node as NULL/NONE is the current node encountered is a unary operator.
         elif self.current_token.type in (TokenType.PLUS, TokenType.MINUS):
-            self.get_next_token()
+            self.next_token()
             return OperatorNode(None, token, self.term())
 
         # return an operand node if current node is integer or float
         elif token.type in (TokenType.INTEGER, TokenType.FLOAT):
-            self.get_next_token()
+            self.next_token()
             return OperandNode(token)
 
         elif token.type == TokenType.LEFT_PARENTHESIS:
-            self.get_next_token()
+            self.next_token()
             result = self.expression()
 
-            self.get_next_token()
+            self.next_token()
             return result
 
     def power(self):
@@ -79,7 +79,7 @@ class Parser:
         ):
 
             operator = self.current_token
-            self.get_next_token()
+            self.next_token()
 
             result = OperatorNode(result, operator, self.factor())
 
@@ -98,7 +98,7 @@ class Parser:
             and self.current_token.type in (TokenType.MULTIPLY, TokenType.DIVIDE)
         ):
             operator = self.current_token
-            self.get_next_token()
+            self.next_token()
 
             result = OperatorNode(result, operator, self.power())
 
@@ -121,7 +121,7 @@ class Parser:
             )
         ):
             operator = self.current_token
-            self.get_next_token()
+            self.next_token()
             result = OperatorNode(result, operator, self.term())
 
         return result
