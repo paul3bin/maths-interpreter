@@ -42,7 +42,7 @@ class Parser:
 
     def factor(self):
         """
-        factor -> NUMBER | LEFT_PARENTHESIS expression RIGHT_PARENTHESIS
+        <factor> -> <number> |  (expression)
         """
         token = self.current_token
 
@@ -67,7 +67,9 @@ class Parser:
             return result
 
     def power(self):
-        """ """
+        """
+        <power> -> <factor> ^ <power> | <factor>
+        """
         result = self.factor()
 
         while (
@@ -86,7 +88,7 @@ class Parser:
     def term(self):
         """
         method for parsing a term
-        term -> factor [(MULTIPLY | DIVIDE) factor]*
+        <term> -> <term> [(* | /) <power>]*
         """
         result = self.power()
 
@@ -105,7 +107,7 @@ class Parser:
     def expression(self):
         """
         method for parsing expression
-        expression -> term [(PLUS | MINUS) term]*
+        <expression> -> <term> [(+ | -) <term>]*
         """
         result = self.term()
 
