@@ -6,7 +6,7 @@ from .nodes import OperandNode, OperatorNode
 BNF :-
 
     <expression> -> <term> [(+ | -) <term>]*
-    <term> -> <term> [(* | /) <power>]*
+    <term> -> <term> [(* | / | %) <power>]*
     <power> -> <factor> ^ <power> | <factor>
     <factor> -> <number> |  (expression) 
     <number> -> <int> <float> | <digit>
@@ -88,14 +88,15 @@ class Parser:
     def term(self):
         """
         method for parsing a term
-        <term> -> <term> [(* | /) <power>]*
+        <term> -> <term> [(* | / | %) <power>]*
         """
         result = self.power()
 
         while (
             self.current_token.type != TokenType.END
             and self.current_token
-            and self.current_token.type in (TokenType.MULTIPLY, TokenType.DIVIDE)
+            and self.current_token.type
+            in (TokenType.MULTIPLY, TokenType.DIVIDE, TokenType.MODULO)
         ):
             operator = self.current_token
             self.next_token()

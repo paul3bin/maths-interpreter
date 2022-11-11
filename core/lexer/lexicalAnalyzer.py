@@ -10,7 +10,17 @@ TO ADD:
 from .token import Token, TokenType
 
 WHITESPACE = " \t"
-ALLOWED_CHARACTERS = "0123456789+-/*()^. \n\t"
+ALLOWED_CHARACTERS = "0123456789+-/*%()^. \n\t"
+ALLOWED_OP_CHARACTERS = ("+", "-", "/", "*", "%", "(", ")", "^", "%")
+OP_TOKEN_TYPE = (
+    TokenType.MULTIPLY,
+    TokenType.PLUS,
+    TokenType.DIVIDE,
+    TokenType.MINUS,
+    TokenType.LEFT_PARENTHESIS,
+    TokenType.CARET,
+    TokenType.MODULO,
+)
 
 
 class Lexer:
@@ -53,7 +63,7 @@ class Lexer:
 
                 # checking if current character is one of the following characters:
                 # +, -, *, /, (, )
-                elif character in ("+", "-", "/", "*", "(", ")", "^"):
+                elif character in ALLOWED_OP_CHARACTERS:
 
                     # checking if numbers are present in the number string.
                     # If yes, append the integer token to the token list and assign empty string to the number_string variable.
@@ -90,14 +100,7 @@ class Lexer:
                         # if the last token in token list
                         # is one of the TokenTypes other than INTEGER and FLOAT
                         # then raise an exception
-                        elif self.__tokens[-1].type in [
-                            TokenType.MULTIPLY,
-                            TokenType.PLUS,
-                            TokenType.DIVIDE,
-                            TokenType.MINUS,
-                            TokenType.LEFT_PARENTHESIS,
-                            TokenType.CARET,
-                        ]:
+                        elif self.__tokens[-1].type in OP_TOKEN_TYPE:
                             raise Exception("Invalid expression")
 
                         else:
@@ -113,14 +116,7 @@ class Lexer:
                         # if the last token in token list
                         # is one of the TokenTypes other than INTEGER and FLOAT
                         # then raise an exception
-                        elif self.__tokens[-1].type in [
-                            TokenType.MULTIPLY,
-                            TokenType.PLUS,
-                            TokenType.DIVIDE,
-                            TokenType.MINUS,
-                            TokenType.LEFT_PARENTHESIS,
-                            TokenType.CARET,
-                        ]:
+                        elif self.__tokens[-1].type in OP_TOKEN_TYPE:
                             raise Exception("Invalid expression")
                         else:
                             self.__tokens.append(Token(TokenType.DIVIDE, "'/'"))
@@ -141,18 +137,25 @@ class Lexer:
                         # if the last token in token list
                         # is one of the TokenTypes other than INTEGER and FLOAT
                         # then raise an exception
-                        elif self.__tokens[-1].type in [
-                            TokenType.MULTIPLY,
-                            TokenType.PLUS,
-                            TokenType.DIVIDE,
-                            TokenType.MINUS,
-                            TokenType.LEFT_PARENTHESIS,
-                            TokenType.RIGHT_PARENTHESIS,
-                            TokenType.CARET,
-                        ]:
+                        elif self.__tokens[-1].type in OP_TOKEN_TYPE:
                             raise Exception("Invalid expression")
                         else:
                             self.__tokens.append(Token(TokenType.CARET, "'^'"))
+
+                    elif character == "%":
+                        # if token list is empty and,
+                        # the first character encountered is plus
+                        # then raise an exception
+                        if not self.__tokens:
+                            raise Exception("Invalid expression")
+
+                        # if the last token in token list
+                        # is one of the TokenTypes other than INTEGER and FLOAT
+                        # then raise an exception
+                        elif self.__tokens[-1].type in OP_TOKEN_TYPE:
+                            raise Exception("Invalid expression")
+                        else:
+                            self.__tokens.append(Token(TokenType.MODULO, "'%'"))
 
             # if number string is not empty once loop ends,then add the integer token to the list
             if number_string:
