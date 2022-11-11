@@ -16,6 +16,8 @@ class TokenType(Enum):
     RIGHT_PARENTHESIS = "RIGHT_PARENTHESIS"
     FLOAT = "FLOAT"
     CARET = "CARET"
+    ASSIGN = "ASSIGN"
+    IDENTIFIER = "IDENTIFIER"
     END = "END"
 
 
