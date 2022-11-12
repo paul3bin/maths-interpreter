@@ -1,6 +1,6 @@
 from core.lexer.token import Token, TokenType
 
-from .nodes import OperandNode, OperatorNode
+from .nodes import IdentifierNode, OperandNode, OperatorNode
 
 """
 BNF :-
@@ -58,6 +58,10 @@ class Parser:
         elif token.type in (TokenType.INTEGER, TokenType.FLOAT):
             self.next_token()
             return OperandNode(token)
+
+        elif token.type == TokenType.IDENTIFIER:
+            self.next_token()
+            return IdentifierNode(token)
 
         elif token.type == TokenType.LEFT_PARENTHESIS:
             self.next_token()
@@ -127,11 +131,25 @@ class Parser:
 
         return result
 
+    def assignment(self):
+
+        result = self.expression()
+        while (
+            self.current_token.type != TokenType.END
+            and self.current_token
+            and self.current_token.type == TokenType.ASSIGN
+        ):
+            operator = self.current_token
+            self.next_token()
+            result = OperatorNode(result, operator, self.expression())
+
+        return result
+
     def parse(self):
         """
         Parses the tokens list and returns an AST (Abstract Syntax Tree)
         """
-        result = self.expression()
+        result = self.assignment()
 
         # checking if opened Parentheses are closed
         if self.parenthesis_count % 2 != 0:
