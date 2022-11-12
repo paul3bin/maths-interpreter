@@ -5,10 +5,11 @@ from .nodes import OperandNode, OperatorNode
 """
 BNF :-
 
-    expression -> term [(PLUS | MINUS) term]*
-    term -> factor [(MULTIPLY | DIVIDE) factor]*
-    factor -> NUMBER | LEFT_PARENTHESIS expression RIGHT_PARENTHESIS
-
+    <expression> -> <term> [(+ | -) <term>]*
+    <term> -> <term> [(* | / | %) <power>]*
+    <power> -> <factor> ^ <power> | <factor>
+    <factor> -> <number> |  (expression) 
+    <number> -> <int> <float> | <digit>
 """
 
 
@@ -18,9 +19,9 @@ class Parser:
         self.current_token: Token = None
         self.position = 0
         self.parenthesis_count = 0
-        self.get_next_token()
+        self.next_token()
 
-    def get_next_token(self):
+    def next_token(self):
         """
         assigns token at position value to the current token
         """
@@ -41,7 +42,7 @@ class Parser:
 
     def factor(self):
         """
-        factor -> NUMBER | LEFT_PARENTHESIS expression RIGHT_PARENTHESIS
+        <factor> -> <number> |  (expression)
         """
         token = self.current_token
 
@@ -50,47 +51,64 @@ class Parser:
 
         # set the left node as NULL/NONE is the current node encountered is a unary operator.
         elif self.current_token.type in (TokenType.PLUS, TokenType.MINUS):
-            self.get_next_token()
+            self.next_token()
             return OperatorNode(None, token, self.term())
 
         # return an operand node if current node is integer or float
         elif token.type in (TokenType.INTEGER, TokenType.FLOAT):
-            self.get_next_token()
+            self.next_token()
             return OperandNode(token)
 
         elif token.type == TokenType.LEFT_PARENTHESIS:
-            self.get_next_token()
+            self.next_token()
             result = self.expression()
 
-            self.get_next_token()
+            self.next_token()
             return result
 
-    def term(self):
+    def power(self):
         """
-        method for parsing a term
-        term -> factor [(MULTIPLY | DIVIDE) factor]*
+        <power> -> <factor> ^ <power> | <factor>
         """
         result = self.factor()
 
         while (
             self.current_token.type != TokenType.END
             and self.current_token
+            and self.current_token.type == TokenType.CARET
+        ):
+
+            operator = self.current_token
+            self.next_token()
+
+            result = OperatorNode(result, operator, self.factor())
+
+        return result
+
+    def term(self):
+        """
+        method for parsing a term
+        <term> -> <term> [(* | / | %) <power>]*
+        """
+        result = self.power()
+
+        while (
+            self.current_token.type != TokenType.END
+            and self.current_token
             and self.current_token.type
-            in (
-                TokenType.MULTIPLY,
-                TokenType.DIVIDE,
-            )
+            in (TokenType.MULTIPLY, TokenType.DIVIDE, TokenType.MODULO)
         ):
             operator = self.current_token
-            self.get_next_token()
-            result = OperatorNode(result, operator, self.factor())
+            self.next_token()
+
+            result = OperatorNode(result, operator, self.power())
 
         return result
 
     def expression(self):
         """
         method for parsing expression
-        expression -> term [(PLUS | MINUS) term]*
+        <expression> -> <term> [(+ | -) <term>]*
         """
         result = self.term()
 
@@ -104,7 +122,7 @@ class Parser:
             )
         ):
             operator = self.current_token
-            self.get_next_token()
+            self.next_token()
             result = OperatorNode(result, operator, self.term())
 
         return result

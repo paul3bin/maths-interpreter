@@ -18,6 +18,7 @@ import re  # maybe need to use for data validation/verification
 # - If parent window shuts, so does any child window
 # - QVBoxLayout() - Reactive design?
 
+
 class SaveWindow(QtWidgets.QWidget):
     switch_window = QtCore.pyqtSignal(str)
 

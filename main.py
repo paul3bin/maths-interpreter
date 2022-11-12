@@ -1,25 +1,34 @@
 """
 Authors: Max James, Christopher Gavey, Ebin Paul, Aswin, Soniya
 Program: Mathematical visualisation software interpreter
-Version: 1.03
-Version Date: 04/11/2022
+Version: 1.1
+Version Date: 08/11/2022
 """
 from core.interpreter import Interpreter
 from core.lexer.lexicalAnalyzer import Lexer
 from core.parser.syntaxAnalyzer import Parser
 
-while True:
-    input_string = input("Enter expression >> ")
+
+def main(input_string: str):
     lexer = Lexer(input_string)
 
     tokens = lexer.get_tokens()
 
     parser = Parser(tokens)
 
-    ast = parser.parse()
+    root_node = parser.parse()
 
-    interpreter = Interpreter(ast)
+    interpreter = Interpreter(root_node)
 
     result = interpreter.execute()
 
-    print(result)
+    return result
+
+
+if __name__ == "__main__":
+    while True:
+        input_string = input("Enter expression >> ")
+        if input_string:
+            print(main(input_string))
+
+        continue
