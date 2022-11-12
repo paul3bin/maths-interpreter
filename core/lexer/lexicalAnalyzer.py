@@ -1,12 +1,3 @@
-"""
-TO ADD:
-
-1) VARIABLE DECLARATION
-2) Executing expressions with variables in it
-
-"""
-
-
 from string import ascii_lowercase, ascii_uppercase
 
 from .token import Token, TokenType

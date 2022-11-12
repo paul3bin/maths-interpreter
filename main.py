@@ -1,7 +1,7 @@
 """
 Authors: Max James, Christopher Gavey, Ebin Paul, Aswin, Soniya
 Program: Mathematical visualisation software interpreter
-Version: 1.1
+Version: 2
 Version Date: 08/11/2022
 """
 from core.interpreter import main
