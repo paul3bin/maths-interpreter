@@ -9,7 +9,7 @@ from core.lexer.lexicalAnalyzer import Lexer
 from core.parser.syntaxAnalyzer import Parser
 
 
-def main(input_string: str):
+def main_execute(input_string: str):
     lexer = Lexer(input_string)
 
     tokens = lexer.get_tokens()

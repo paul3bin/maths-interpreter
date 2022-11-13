@@ -11,6 +11,9 @@ import matplotlib
 from os import listdir
 from os.path import isfile, join
 import re  # maybe need to use for data validation/verification
+from core.interpreter import Interpreter
+from core.lexer.lexicalAnalyzer import Lexer
+from core.parser.syntaxAnalyzer import Parser
 
 # Access main window from child - https://stackoverflow.com/questions/72169262/pyqt5-access-mainwindow-from-another-window
 
@@ -589,6 +592,14 @@ def main():
     controller.show_main()
     sys.exit(app.exec_())
 
+def exec_ute(input_string: str):
+    lexer = Lexer(input_string)
+    tokens = lexer.get_tokens()
+    parser = Parser(tokens)
+    root_node = parser.parse()
+    interpreter = Interpreter(root_node)
+    result = interpreter.execute()
+    return result
 
 if __name__ == '__main__':
     main()
