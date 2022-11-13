@@ -41,6 +41,15 @@ class SaveWindow(QtWidgets.QWidget):
         b1.clicked.connect(self.switch)
         b1.move(125, 70)
 
+        error = QtWidgets.QLabel('Red', self)
+        error.setStyleSheet("color:tomato;")
+        error.setText("Script name not suitable")
+        font = error.font()
+        font.setPointSize(14)
+        error.setFont(font)
+        error.move(89, 102)
+        error.setVisible(False)  # Initially set as False, unless error occurs
+
     def switch(self):
         self.switch_window.emit(self.name.toPlainText() + ".txt")
 
@@ -71,6 +80,15 @@ class LoadWindow(QtWidgets.QWidget):
         b1.clicked.connect(self.select)
         b1.move(125, 70)
 
+        self.error = QtWidgets.QLabel('Red', self)
+        self.error.setStyleSheet("color:tomato;")
+        self.error.setText("No script name selected")
+        font = self.error.font()
+        font.setPointSize(14)
+        self.error.setFont(font)
+        self.error.move(89, 102)  # 36, 32
+        self.error.setVisible(False)  # Initially set as False, unless error occurs
+
     def select(self):
         # Use ReGex to employ data validation/verification
         # If self.input1 is not empty ect
@@ -83,7 +101,7 @@ class VariableWindow(QtWidgets.QWidget):
 
     def __init__(self):
         QtWidgets.QWidget.__init__(self)
-        self.setGeometry(550, 370, 350, 170)  # Size of the window
+        self.setGeometry(550, 370, 350, 190)  # Size of the window
         name = QtWidgets.QLabel(self)
         name.setText("<b>Variable assignment</b>")
         font = name.font()
@@ -117,6 +135,15 @@ class VariableWindow(QtWidgets.QWidget):
         b1.setText("Submit")
         b1.clicked.connect(self.switch)
         b1.move(120, 125)
+
+        error = QtWidgets.QLabel('Red', self)
+        error.setStyleSheet("color:tomato;")
+        error.setText("No script name selected")
+        font = error.font()
+        font.setPointSize(14)
+        error.setFont(font)
+        error.move(100, 160)
+        error.setVisible(False)  # Initially set as False, unless error occurs
 
     def switch(self):
         self.switch_window.emit(self.input1.text() + "=" + self.input2.text())
