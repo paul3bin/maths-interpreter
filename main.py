@@ -155,10 +155,15 @@ class MainWindow(QtWidgets.QWidget):
     switch_window2 = QtCore.pyqtSignal()
     switch_window3 = QtCore.pyqtSignal()
 
-    def __init__(self, text, outputText, scriptText, pos, var, save, load):
+    def __init__(self, text, outputText, scriptText, pos, varHold, var, save, load):
         QtWidgets.QWidget.__init__(self)
         self.setGeometry(100, 100, 1250, 700)
         self.setWindowTitle('MathChamp')
+
+        self.varDict = varHold  # dictionary to hold the variables
+        #self.lineHold = lines
+        self.linePos = -1 # Should be -1 (unless loading after sub-window - need to do more)
+        print("First line position: " + str(self.linePos))
 
         # Name at the top of application
         name = QtWidgets.QLabel(self)
@@ -515,17 +520,26 @@ class MainWindow(QtWidgets.QWidget):
                     cursor.insertText(">> ")
                     self.firstPos = cursor.position()
                     print("Output box to be cleared - DONE")
-                    print("Variables need to be cleared")
-                    print("Clear previous line count [^]")
+                    print("Variables need to be cleared - DONE?")
+                    print("Clear previous line count [^] - DONE?")
                     print("This implementation is not finished")
                     cursor.endEditBlock()
+                    #self.lineHold = []
+                    self.varDict = {}
                 else:
                     print("Line output: " + line)
+                    #self.lineHold.append(line)
+                    #if self.linePos != len(self.lineHold):
+                        #self.linePos = self.linePos + 1
+                    #else:
+                        #self.linePos = len(self.lineHold)
+
+                    print("Line position after line entry: " + str(self.linePos))
 
                     try:
                         cursor.insertText("\n"+str(main_execute(line)))
-                    except:
-                        cursor.insertText("\nException!")
+                    except Exception as e:
+                        cursor.insertText("\nERROR: " + str(e))
 
                     #self.firstPos = self.lastPos
                     self.firstPos = cursor.position()
@@ -535,6 +549,24 @@ class MainWindow(QtWidgets.QWidget):
                 self.savedHtmlText = self.outputBox.toHtml()
                 self.savedPlainText = self.outputBox.toPlainText()
 
+            if event.key() == QtCore.Qt.Key_Up and self.outputBox.hasFocus():
+
+                cursor = QtGui.QTextCursor(self.outputBox.document())
+
+                self.linePos = self.linePos - 1
+
+                if self.linePos <= -1:  # making sure it doesn't get an index that doesn't exist
+                    self.linePos = 0
+
+                #cursor.beginEditBlock()
+                #cursor.movePosition(QtGui.QTextCursor.End, QtGui.QTextCursor.MoveAnchor)
+                #cursor.insertText(self.lineHold[self.linePos])
+                #print("First pos onwards: " + self.outputBox.toPlainText()[self.firstPos+3:])
+                #cursor.movePosition(QtGui.QTextCursor.End, QtGui.QTextCursor.MoveAnchor)
+                #cursor.endEditBlock()
+
+                #print("Line position (after up): " + str(self.linePos))
+
         return super().eventFilter(obj, event)
 
 
@@ -543,6 +575,8 @@ class Controller:
     outputBoxText = ">> "
     inputBoxText = ""
     pos = 0
+    #lineHold = []
+    varDict = {}
 
     def __init__(self):
         pass
@@ -569,7 +603,7 @@ class Controller:
             self.outputBoxText = self.main.savedPlainText
             text = self.outputBoxText + text
 
-        self.main = MainWindow(text, self.outputBoxText, self.inputBoxText, self.pos, self.window, self.saveWin, self.loadWin)
+        self.main = MainWindow(text, self.outputBoxText, self.inputBoxText, self.pos, self.varDict, self.window, self.saveWin, self.loadWin)
         self.window = None
         self.saveWin = None
         self.loadWin = None
@@ -588,6 +622,8 @@ class Controller:
         self.outputBoxText = self.main.savedPlainText
         self.inputBoxText = self.main.scriptBox.toPlainText()
         self.pos = self.main.firstPos
+        self.varDict = self.main.varDict
+        #self.lineHold = self.main.lineHold
 
         self.window.switch_window.connect(self.show_main)
         self.window.show()
@@ -598,6 +634,8 @@ class Controller:
         self.outputBoxText = self.main.savedPlainText
         self.inputBoxText = self.main.scriptBox.toPlainText()
         self.pos = self.main.firstPos
+        self.varDict = self.main.varDict
+        #self.lineHold = self.main.lineHold
 
         self.saveWin.switch_window.connect(self.show_main)
         self.saveWin.show()
@@ -608,6 +646,8 @@ class Controller:
         self.outputBoxText = self.main.savedPlainText
         self.inputBoxText = self.main.scriptBox.toPlainText()
         self.pos = self.main.firstPos
+        self.varDict = self.main.varDict
+        #self.lineHold = self.main.lineHold
 
         self.loadWin.switch_window.connect(self.show_main)
         self.loadWin.show()
