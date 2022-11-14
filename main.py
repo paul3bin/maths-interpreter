@@ -1,15 +1,27 @@
 """
-Authors: Max James, Christopher Gavey, Ebin Paul, Aswin, Soniya
-Program: Mathematical visualisation software interpreter
-Version: 2
-Version Date: 08/11/2022
+Authors: Max, Paul, Chris, Ashwin and Sonya
+Description: Function and value plotter
+Version: V1.01
 """
-from core.interpreter import main
+import sys
+from tkinter.ttk import Style
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvasQTAgg
+from PyQt5.QtWidgets import QApplication, QWidget
 
-if __name__ == "__main__":
-    while True:
-        input_string = input("Enter expression >> ")
-        if input_string:
-            print(main(input_string))
 
-        continue
+"""User Input to be define"""
+x_values = [1], 
+y_values = [2]
+
+"""Windows and Chart Formatting"""
+fig = plt.figure("MathChamp")
+plt.title("Expression")
+
+plt.xlabel("X")
+plt.ylabel("Y")
+
+plt.plot(x_values, y_values, color="green")
+
+plt.show()
