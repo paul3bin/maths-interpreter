@@ -1,16 +1,18 @@
 # https://stackoverflow.com/questions/15263063/why-keypress-event-in-pyqt-does-not-work-for-key-enter
 # STOP button - https://stackoverflow.com/questions/27802270/how-to-stop-a-function
 
-from PyQt5 import QtWidgets, QtCore, QtGui
-from PyQt5.QtWidgets import QApplication, QLabel, QMainWindow, QTableWidget, QVBoxLayout, QWidget
-from PyQt5.QtGui import QPixmap, QIcon
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
+import re  # maybe need to use for data validation/verification
 import sys
-import matplotlib
 from os import listdir
 from os.path import isfile, join
-import re  # maybe need to use for data validation/verification
+
+import matplotlib
+from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtGui import QIcon, QPixmap
+from PyQt5.QtWidgets import (QApplication, QLabel, QMainWindow, QTableWidget,
+                             QVBoxLayout, QWidget)
 
 # Access main window from child - https://stackoverflow.com/questions/72169262/pyqt5-access-mainwindow-from-another-window
 
