@@ -18,7 +18,7 @@ class Parser:
         self.__tokens = tokens
         self.current_token: Token = None
         self.position = 0
-        self.parenthesis_count = 0
+        self.parenthesis_stack = []
         self.next_token()
 
     def next_token(self):
@@ -31,11 +31,14 @@ class Parser:
                 self.current_token = self.__tokens[self.position]
                 self.position += 1
 
-                if self.current_token.type in (
-                    TokenType.LEFT_PARENTHESIS,
-                    TokenType.RIGHT_PARENTHESIS,
-                ):
-                    self.parenthesis_count += 1
+                if self.current_token.type == TokenType.LEFT_PARENTHESIS:
+                    self.parenthesis_stack.append(")")
+
+                elif self.current_token.type == TokenType.RIGHT_PARENTHESIS:
+                    try:
+                        self.parenthesis_stack.pop()
+                    except:
+                        raise Exception("Missing parenthesis")
 
         except:
             raise Exception("Invalid expression.")
@@ -152,7 +155,10 @@ class Parser:
         result = self.assignment()
 
         # checking if opened Parentheses are closed
-        if self.parenthesis_count % 2 != 0:
+        # if self.parenthesis_count % 2 != 0:
+        #     raise Exception("Missing parenthesis")
+
+        if self.parenthesis_stack:
             raise Exception("Missing parenthesis")
 
         return result
