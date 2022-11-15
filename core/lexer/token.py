@@ -17,6 +17,8 @@ class TokenType(Enum):
     FLOAT = "FLOAT"
     CARET = "CARET"
     ASSIGN = "ASSIGN"
+    GT="GREATER_THAN"
+    LT="LESS_THAN"
     IDENTIFIER = "IDENTIFIER"
     END = "END"
 

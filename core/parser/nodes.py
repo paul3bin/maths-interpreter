@@ -95,6 +95,9 @@ class OperatorNode:
         elif self.operator.type == TokenType.MODULO:
             return self.left_node.get_node_value() % self.right_node.get_node_value()
 
+        elif self.operator.type == TokenType.LT:
+            return self.left_node.get_node_value() < self.right_node.get_node_value()
+
         elif self.operator.type == TokenType.ASSIGN:
             SYMBOL_TABLE[str(self.left_node)] = self.right_node.get_node_value()
 
