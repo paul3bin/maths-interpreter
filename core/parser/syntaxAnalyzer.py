@@ -140,7 +140,7 @@ class Parser:
         while (
             self.current_token.type != TokenType.END
             and self.current_token
-            and self.current_token.type == TokenType.LT
+            and self.current_token.type in (TokenType.LT, TokenType.GT)
         ):
             operator = self.current_token
             self.next_token()

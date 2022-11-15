@@ -198,13 +198,29 @@ class Lexer:
                             raise Exception("Invalid expression")
 
                         # if the last token in token list
-                        # is one of the TokenTypes other than INTEGER and FLOAT
+                        # is one of the TokenTypes other than INTEGER , FLOAT and IDENTIFIER
                         # then raise an exception
                         elif self.__tokens[-1].type in OP_TOKEN_TYPE:
                             raise Exception("Invalid expression")
 
                         else:
                             self.__tokens.append(Token(TokenType.LT, "'<'"))
+
+                    elif character == ">":
+                        # if token list is empty and,
+                        # the first character encountered is plus
+                        # then raise an exception
+                        if not self.__tokens:
+                            raise Exception("Invalid expression")
+
+                        # if the last token in token list
+                        # is one of the TokenTypes other than INTEGER , FLOAT and IDENTIFIER
+                        # then raise an exception
+                        elif self.__tokens[-1].type in OP_TOKEN_TYPE:
+                            raise Exception("Invalid expression")
+
+                        else:
+                            self.__tokens.append(Token(TokenType.GT, "'>'"))
 
             # if number string is not empty once loop ends,then add the integer token to the list
             if number_string:
