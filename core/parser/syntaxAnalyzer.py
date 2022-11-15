@@ -154,10 +154,6 @@ class Parser:
         """
         result = self.assignment()
 
-        # checking if opened Parentheses are closed
-        # if self.parenthesis_count % 2 != 0:
-        #     raise Exception("Missing parenthesis")
-
         if self.parenthesis_stack:
             raise Exception("Missing parenthesis")
 
