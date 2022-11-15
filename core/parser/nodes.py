@@ -1,5 +1,7 @@
 from core.lexer.token import Token, TokenType
 
+SYMBOL_TABLE = {}
+
 
 class OperandNode:
     """
@@ -15,6 +17,24 @@ class OperandNode:
 
     def __str__(self):
         return f"{self.__value}"
+
+    def __repr__(self):
+        return self.__str__()
+
+
+class IdentifierNode:
+    def __init__(self, token: Token):
+        self.token: Token = token
+        self.__value = self.token.value
+
+    def get_node_value(self):
+        try:
+            return SYMBOL_TABLE[self.__value]
+        except:
+            raise Exception(f"{self.__value} not defined.")
+
+    def __str__(self):
+        return self.__value
 
     def __repr__(self):
         return self.__str__()
@@ -74,6 +94,11 @@ class OperatorNode:
 
         elif self.operator.type == TokenType.MODULO:
             return self.left_node.get_node_value() % self.right_node.get_node_value()
+
+        elif self.operator.type == TokenType.ASSIGN:
+            SYMBOL_TABLE[str(self.left_node)] = self.right_node.get_node_value()
+
+            return SYMBOL_TABLE[str(self.left_node)]
 
     def __str__(self):
         return f"{self.left_node} {self.operator.type.name} {self.right_node}"
