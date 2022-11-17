@@ -18,6 +18,4 @@ def main(input_string: str):
 
     result = interpreter.execute()
 
-    # result = Lexer(input_string).get_tokens()
-
     return result
