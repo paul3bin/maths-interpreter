@@ -4,7 +4,7 @@ from .token import Token, TokenType
 
 WHITESPACE = " \t"
 ALLOWED_IDENTIFIERS = "".join(tuple(ascii_lowercase)) + "".join(tuple(ascii_uppercase))
-ALLOWED_CHARACTERS = digits + "+-/*%()^=. \n\t" + ALLOWED_IDENTIFIERS
+ALLOWED_CHARACTERS = digits + "+-/*%()^=.<> \n\t" + ALLOWED_IDENTIFIERS
 ALLOWED_OP_CHARACTERS = ("+", "-", "/", "*", "%", "(", ")", "^", "%", "=")
 OP_TOKEN_TYPE = (
     TokenType.MULTIPLY,
