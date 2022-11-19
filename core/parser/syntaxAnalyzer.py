@@ -134,9 +134,23 @@ class Parser:
 
         return result
 
-    def assignment(self):
+    def comparison(self):
 
         result = self.expression()
+        while (
+            self.current_token.type != TokenType.END
+            and self.current_token
+            and self.current_token.type in (TokenType.LT, TokenType.GT)
+        ):
+            operator = self.current_token
+            self.next_token()
+            result = OperatorNode(result, operator, self.expression())
+
+        return result
+
+    def assignment(self):
+
+        result = self.comparison()
         while (
             self.current_token.type != TokenType.END
             and self.current_token
@@ -153,10 +167,6 @@ class Parser:
         Parses the tokens list and returns an AST (Abstract Syntax Tree)
         """
         result = self.assignment()
-
-        # checking if opened Parentheses are closed
-        # if self.parenthesis_count % 2 != 0:
-        #     raise Exception("Missing parenthesis")
 
         if self.parenthesis_stack:
             raise Exception("Missing parenthesis")
