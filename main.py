@@ -1,16 +1,25 @@
 # https://stackoverflow.com/questions/15263063/why-keypress-event-in-pyqt-does-not-work-for-key-enter
 # STOP button - https://stackoverflow.com/questions/27802270/how-to-stop-a-function
 
-from PyQt5 import QtWidgets, QtCore, QtGui
-from PyQt5.QtWidgets import QApplication, QLabel, QMainWindow, QTableWidget, QVBoxLayout, QWidget
-from PyQt5.QtGui import QPixmap, QIcon
+import re  # maybe need to use for data validation/verification
+import sys
+from os import listdir
+
+import matplotlib
+from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-import sys
-import matplotlib
-from os import listdir
-import re  # maybe need to use for data validation/verification
-from mainExecution import main_execute
+from PyQt5.QtGui import QIcon, QPixmap
+from PyQt5.QtWidgets import (
+    QApplication,
+    QLabel,
+    QMainWindow,
+    QTableWidget,
+    QVBoxLayout,
+    QWidget,
+)
+
+from core.interpreter import main_execute
 
 # Access main window from child - https://stackoverflow.com/questions/72169262/pyqt5-access-mainwindow-from-another-window
 
@@ -41,7 +50,7 @@ class SaveWindow(QtWidgets.QWidget):
         b1.clicked.connect(self.switch)
         b1.move(125, 70)
 
-        error = QtWidgets.QLabel('Red', self)
+        error = QtWidgets.QLabel("Red", self)
         error.setStyleSheet("color:tomato;")
         error.setText("Script name not suitable")
         font = error.font()
@@ -80,7 +89,7 @@ class LoadWindow(QtWidgets.QWidget):
         b1.clicked.connect(self.select)
         b1.move(125, 70)
 
-        self.error = QtWidgets.QLabel('Red', self)
+        self.error = QtWidgets.QLabel("Red", self)
         self.error.setStyleSheet("color:tomato;")
         self.error.setText("No script name selected")
         font = self.error.font()
@@ -136,7 +145,7 @@ class VariableWindow(QtWidgets.QWidget):
         b1.clicked.connect(self.switch)
         b1.move(120, 125)
 
-        error = QtWidgets.QLabel('Red', self)
+        error = QtWidgets.QLabel("Red", self)
         error.setStyleSheet("color:tomato;")
         error.setText("No script name selected")
         font = error.font()
@@ -158,11 +167,13 @@ class MainWindow(QtWidgets.QWidget):
     def __init__(self, text, outputText, scriptText, pos, varHold, var, save, load):
         QtWidgets.QWidget.__init__(self)
         self.setGeometry(100, 100, 1250, 700)
-        self.setWindowTitle('MathChamp')
+        self.setWindowTitle("MathChamp")
 
         self.varDict = varHold  # dictionary to hold the variables
-        #self.lineHold = lines
-        self.linePos = -1 # Should be -1 (unless loading after sub-window - need to do more)
+        # self.lineHold = lines
+        self.linePos = (
+            -1
+        )  # Should be -1 (unless loading after sub-window - need to do more)
         print("First line position: " + str(self.linePos))
 
         # Name at the top of application
@@ -176,7 +187,7 @@ class MainWindow(QtWidgets.QWidget):
 
         # Label at the top of application
         label = QLabel(self)
-        pixmap = QPixmap('./ui/templogo.jpg')
+        pixmap = QPixmap("./ui/templogo.jpg")
         label.setPixmap(pixmap.scaled(55, 55))
         label.adjustSize()
         label.move(26, 7)
@@ -201,19 +212,19 @@ class MainWindow(QtWidgets.QWidget):
 
         cursor = QtGui.QTextCursor(self.outputBox.document())
         cursor.beginEditBlock()
-        #cursor.insertText(">> ") TEMPORARY
+        # cursor.insertText(">> ") TEMPORARY
 
         if var != None:  # variable window text
             cursor.insertText(text)
 
         if save != None:
-            with open('./ui/scripts/' + text, 'w') as f:  # Need to fix
+            with open("./ui/scripts/" + text, "w") as f:  # Need to fix
                 f.write(self.scriptBox.toPlainText())
 
             self.outputBox.setText(outputText)
 
         if load != None:
-            with open('./ui/scripts/' + text, 'r') as f:
+            with open("./ui/scripts/" + text, "r") as f:
                 self.scriptBox.setText(f.read())
 
             self.outputBox.setText(outputText)
@@ -240,19 +251,21 @@ class MainWindow(QtWidgets.QWidget):
         table.setColumnWidth(1, 153)
         table.resize(337, 447)
         table.move(887, 70)
-        table.setEditTriggers(QtWidgets.QTableWidget.NoEditTriggers)  # user can't edit variable table
+        table.setEditTriggers(
+            QtWidgets.QTableWidget.NoEditTriggers
+        )  # user can't edit variable table
 
         # Buttons
         self.runButton = QtWidgets.QPushButton(self)
         self.runButton.setText("RUN")
-        self.runButton.setIcon(QIcon('./ui/start.jpg'))
+        self.runButton.setIcon(QIcon("./ui/start.jpg"))
         self.runButton.clicked.connect(self.run_script)  # runs text in script window
         self.runButton.resize(70, 75)
         self.runButton.move(1020, 522)
 
         self.stopButton = QtWidgets.QPushButton(self)
         self.stopButton.setText("STOP")
-        self.stopButton.setIcon(QIcon('./ui/stop.jpg'))
+        self.stopButton.setIcon(QIcon("./ui/stop.jpg"))
         # self.stopButton.clicked.connect(clicked)  # connected to a function
         self.stopButton.resize(70, 75)
         self.stopButton.move(1089, 522)
@@ -443,15 +456,21 @@ class MainWindow(QtWidgets.QWidget):
 
     def run_script(self):  # For running the main input script
         cursor = self.scriptBox.textCursor()  # Cursor of the input box
-        cursor2 = QtGui.QTextCursor(self.outputBox.document())  # Cursor of the output box
+        cursor2 = QtGui.QTextCursor(
+            self.outputBox.document()
+        )  # Cursor of the output box
 
         if cursor.hasSelection():  # If text is highlighted
             # Output highlighted text on the command line
-            selected = self.scriptBox.toPlainText()[cursor.selectionStart():cursor.selectionEnd()].strip()
+            selected = self.scriptBox.toPlainText()[
+                cursor.selectionStart() : cursor.selectionEnd()
+            ].strip()
             script_type = "Running partial script...\n"
 
         else:
-            selected = self.scriptBox.toPlainText().strip()  # Output whole script on command line
+            selected = (
+                self.scriptBox.toPlainText().strip()
+            )  # Output whole script on command line
             script_type = "Running script...\n"
 
         cursor2.beginEditBlock()
@@ -459,20 +478,30 @@ class MainWindow(QtWidgets.QWidget):
         cursor2.insertText(script_type)  # Output that the whole script is running
 
         for line in selected.splitlines():
-            cursor2.movePosition(QtGui.QTextCursor.End, QtGui.QTextCursor.MoveAnchor)  # moves cursor to end
+            cursor2.movePosition(
+                QtGui.QTextCursor.End, QtGui.QTextCursor.MoveAnchor
+            )  # moves cursor to end
             cursor2.insertText(">> " + line + "\n")
             try:
                 cursor2.insertText(str(main_execute(line)) + "\n")
             except:
-                cursor2.insertText("ERROR: Issue at line " + str(selected.splitlines().index(line)+1) + "\n")
+                cursor2.insertText(
+                    "ERROR: Issue at line "
+                    + str(selected.splitlines().index(line) + 1)
+                    + "\n"
+                )
                 break
 
         cursor2.insertText(">> ")
-        self.firstPos = cursor2.position()  # records first position of cursor line (for string output)
+        self.firstPos = (
+            cursor2.position()
+        )  # records first position of cursor line (for string output)
         cursor2.endEditBlock()
 
         self.savedPlainText = self.outputBox.toPlainText()  # Save the plain text
-        self.savedHtmlText = self.outputBox.toHtml()  # Save the HTML (i.e. if text bolded, coloured etc)
+        self.savedHtmlText = (
+            self.outputBox.toHtml()
+        )  # Save the HTML (i.e. if text bolded, coloured etc)
 
     def variable(self):
         self.switch_window.emit()
@@ -492,7 +521,9 @@ class MainWindow(QtWidgets.QWidget):
                 if self.savedPlainText.strip() == self.outputBox.toPlainText().strip():
                     cursor = QtGui.QTextCursor(self.outputBox.document())
                     cursor.beginEditBlock()
-                    cursor.movePosition(QtGui.QTextCursor.End, QtGui.QTextCursor.MoveAnchor)
+                    cursor.movePosition(
+                        QtGui.QTextCursor.End, QtGui.QTextCursor.MoveAnchor
+                    )
                     cursor.insertText("\n>> ")
                     cursor.endEditBlock()
 
@@ -513,9 +544,13 @@ class MainWindow(QtWidgets.QWidget):
 
                 # ReGeX here - Implement this? Or maybe implement cursor.position() better? Look into this...
                 # Not super amused with implementation here...
-                line = self.outputBox.toPlainText()[self.firstPos: self.lastPos].replace('>>','').strip()
+                line = (
+                    self.outputBox.toPlainText()[self.firstPos : self.lastPos]
+                    .replace(">>", "")
+                    .strip()
+                )
 
-                if line=='clear':
+                if line == "clear":
                     self.outputBox.setText("")
                     cursor.insertText(">> ")
                     self.firstPos = cursor.position()
@@ -524,24 +559,24 @@ class MainWindow(QtWidgets.QWidget):
                     print("Clear previous line count [^] - DONE?")
                     print("This implementation is not finished")
                     cursor.endEditBlock()
-                    #self.lineHold = []
+                    # self.lineHold = []
                     self.varDict = {}
                 else:
                     print("Line output: " + line)
-                    #self.lineHold.append(line)
-                    #if self.linePos != len(self.lineHold):
-                        #self.linePos = self.linePos + 1
-                    #else:
-                        #self.linePos = len(self.lineHold)
+                    # self.lineHold.append(line)
+                    # if self.linePos != len(self.lineHold):
+                    # self.linePos = self.linePos + 1
+                    # else:
+                    # self.linePos = len(self.lineHold)
 
                     print("Line position after line entry: " + str(self.linePos))
 
                     try:
-                        cursor.insertText("\n"+str(main_execute(line)))
+                        cursor.insertText("\n" + str(main_execute(line)))
                     except Exception as e:
                         cursor.insertText("\nERROR: " + str(e))
 
-                    #self.firstPos = self.lastPos
+                    # self.firstPos = self.lastPos
                     self.firstPos = cursor.position()
                     cursor.insertText("\n>> ")
                     cursor.endEditBlock()
@@ -555,17 +590,19 @@ class MainWindow(QtWidgets.QWidget):
 
                 self.linePos = self.linePos - 1
 
-                if self.linePos <= -1:  # making sure it doesn't get an index that doesn't exist
+                if (
+                    self.linePos <= -1
+                ):  # making sure it doesn't get an index that doesn't exist
                     self.linePos = 0
 
-                #cursor.beginEditBlock()
-                #cursor.movePosition(QtGui.QTextCursor.End, QtGui.QTextCursor.MoveAnchor)
-                #cursor.insertText(self.lineHold[self.linePos])
-                #print("First pos onwards: " + self.outputBox.toPlainText()[self.firstPos+3:])
-                #cursor.movePosition(QtGui.QTextCursor.End, QtGui.QTextCursor.MoveAnchor)
-                #cursor.endEditBlock()
+                # cursor.beginEditBlock()
+                # cursor.movePosition(QtGui.QTextCursor.End, QtGui.QTextCursor.MoveAnchor)
+                # cursor.insertText(self.lineHold[self.linePos])
+                # print("First pos onwards: " + self.outputBox.toPlainText()[self.firstPos+3:])
+                # cursor.movePosition(QtGui.QTextCursor.End, QtGui.QTextCursor.MoveAnchor)
+                # cursor.endEditBlock()
 
-                #print("Line position (after up): " + str(self.linePos))
+                # print("Line position (after up): " + str(self.linePos))
 
         return super().eventFilter(obj, event)
 
@@ -575,7 +612,7 @@ class Controller:
     outputBoxText = ">> "
     inputBoxText = ""
     pos = 0
-    #lineHold = []
+    # lineHold = []
     varDict = {}
 
     def __init__(self):
@@ -587,23 +624,32 @@ class Controller:
         try:
             self.window.close()
         except:
-            self.window=None
+            self.window = None
 
         try:
             self.saveWin.close()
         except:
-            self.saveWin=None
+            self.saveWin = None
 
         try:
             self.loadWin.close()
         except:
-            self.loadWin=None
+            self.loadWin = None
 
         if self.window != None:
             self.outputBoxText = self.main.savedPlainText
             text = self.outputBoxText + text
 
-        self.main = MainWindow(text, self.outputBoxText, self.inputBoxText, self.pos, self.varDict, self.window, self.saveWin, self.loadWin)
+        self.main = MainWindow(
+            text,
+            self.outputBoxText,
+            self.inputBoxText,
+            self.pos,
+            self.varDict,
+            self.window,
+            self.saveWin,
+            self.loadWin,
+        )
         self.window = None
         self.saveWin = None
         self.loadWin = None
@@ -623,7 +669,7 @@ class Controller:
         self.inputBoxText = self.main.scriptBox.toPlainText()
         self.pos = self.main.firstPos
         self.varDict = self.main.varDict
-        #self.lineHold = self.main.lineHold
+        # self.lineHold = self.main.lineHold
 
         self.window.switch_window.connect(self.show_main)
         self.window.show()
@@ -635,7 +681,7 @@ class Controller:
         self.inputBoxText = self.main.scriptBox.toPlainText()
         self.pos = self.main.firstPos
         self.varDict = self.main.varDict
-        #self.lineHold = self.main.lineHold
+        # self.lineHold = self.main.lineHold
 
         self.saveWin.switch_window.connect(self.show_main)
         self.saveWin.show()
@@ -647,7 +693,7 @@ class Controller:
         self.inputBoxText = self.main.scriptBox.toPlainText()
         self.pos = self.main.firstPos
         self.varDict = self.main.varDict
-        #self.lineHold = self.main.lineHold
+        # self.lineHold = self.main.lineHold
 
         self.loadWin.switch_window.connect(self.show_main)
         self.loadWin.show()
@@ -659,5 +705,6 @@ def main():
     controller.show_main()
     sys.exit(app.exec_())
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

@@ -1,16 +1,19 @@
 # https://stackoverflow.com/questions/15263063/why-keypress-event-in-pyqt-does-not-work-for-key-enter
 # STOP button - https://stackoverflow.com/questions/27802270/how-to-stop-a-function
 
-from PyQt5 import QtWidgets, QtCore, QtGui
-from PyQt5.QtWidgets import QApplication, QLabel, QMainWindow, QTableWidget, QVBoxLayout, QWidget
-from PyQt5.QtGui import QPixmap, QIcon
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
+import re  # maybe need to use for data validation/verification
 import sys
-import matplotlib
 from os import listdir
 from os.path import isfile, join
-import re  # maybe need to use for data validation/verification
+
+import matplotlib
+from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtGui import QIcon, QPixmap
+from PyQt5.QtWidgets import (QApplication, QLabel, QMainWindow, QTableWidget,
+                             QVBoxLayout, QWidget)
+
 from core.interpreter import Interpreter
 from core.lexer.lexicalAnalyzer import Lexer
 from core.parser.syntaxAnalyzer import Parser
