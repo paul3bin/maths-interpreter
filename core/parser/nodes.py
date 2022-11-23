@@ -1,3 +1,14 @@
+"""
+AUTHOR: Ebin Paul
+DESCRIPTION: The following classes are nodes of Abstract Syntax Tree (AST). Each class has a get_node_value method which returns,
+            the value of that particular node
+            
+REFERENCES: https://ruslanspivak.com/lsbasi-part7/
+            https://ruslanspivak.com/lsbasi-part8/
+            https://dev.to/j0nimost/making-a-math-interpreter-ast-4848
+            https://dev.to/j0nimost/making-a-math-interpreter-parser-52j8
+"""
+
 from core.lexer.token import Token, TokenType
 
 SYMBOL_TABLE = {}
@@ -42,7 +53,7 @@ class IdentifierNode:
 
 class OperatorNode:
     """
-    Class definition for Operator (+, -, *, /) node
+    Class definition for Operator (+, -, *, /, ^, %, <, >, =) node
 
     The left node can either be an operator node or an operand node.
     """

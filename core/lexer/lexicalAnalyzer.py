@@ -1,3 +1,12 @@
+"""
+AUTHOR: Ebin Paul
+DESCRIPTION: The following Lexer class goes through the input string and generates a list of tokens.
+            
+REFERENCES: https://ruslanspivak.com/lsbasi-part7/
+            https://ruslanspivak.com/lsbasi-part8/
+            https://dev.to/j0nimost/implementing-a-math-interpreter-using-c-part2-lexer-4i81
+"""
+
 from string import ascii_lowercase, ascii_uppercase, digits
 
 from .token import Token, TokenType

@@ -1,3 +1,12 @@
+"""
+AUTHOR: Ebin Paul
+DESCRIPTION: The following classes are nodes of Abstract Syntax Tree (AST). Each class has a get_node_value method which returns,
+            the value of that particular node
+            
+REFERENCES: https://ruslanspivak.com/lsbasi-part1/
+"""
+
+
 from enum import Enum
 
 
@@ -17,8 +26,8 @@ class TokenType(Enum):
     FLOAT = "FLOAT"
     CARET = "CARET"
     ASSIGN = "ASSIGN"
-    GT="GREATER_THAN"
-    LT="LESS_THAN"
+    GT = "GREATER_THAN"
+    LT = "LESS_THAN"
     IDENTIFIER = "IDENTIFIER"
     END = "END"
 
