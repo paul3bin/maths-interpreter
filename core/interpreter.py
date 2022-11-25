@@ -12,7 +12,7 @@ class Interpreter:
         return self.__root_node.get_node_value()
 
 
-def main(input_string: str):
+def main_execute(input_string: str):
     interpreter = Interpreter(input_string)
 
     result = interpreter.execute()
