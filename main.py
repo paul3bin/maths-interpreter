@@ -25,6 +25,7 @@ History:     V1 - Basic layout for main window of GUI made
              V2 - GUI is linked to the interpreter code previously made
              V2.1 - Bug fixes to the code
              V3 - Implementing the ability to add a plot
+             V3.1 - Data validation added for all the windows (might need to update for save window)
 
 References: https://stackoverflow.com/questions/15263063/why-keypress-event-in-pyqt-does-not-work-for-key-enter
             https://stackoverflow.com/questions/72169262/pyqt5-access-mainwindow-from-another-window
@@ -267,17 +268,22 @@ class VariableWindow(QtWidgets.QWidget):
         b1.clicked.connect(self.switch)
         b1.move(120, 125)
 
-        error = QtWidgets.QLabel('Red', self)
-        error.setStyleSheet("color:tomato;")
-        error.setText("No script name selected")
-        font = error.font()
+        self.error = QtWidgets.QLabel('Red', self)
+        self.error.setStyleSheet("color:tomato;")
+        self.error.setText("Variable not suitable")
+        font = self.error.font()
         font.setPointSize(14)
-        error.setFont(font)
-        error.move(100, 160)
-        error.setVisible(False)  # Initially set as False, unless error occurs
+        self.error.setFont(font)
+        self.error.move(100, 160)
+        self.error.setVisible(False)  # Initially set as False, unless error occurs
 
     def switch(self):
-        self.switch_window.emit(self.input1.text() + "=" + self.input2.text())
+        text = self.input1.text() + "=" + self.input2.text()
+        try:
+            main_execute(text)
+            self.switch_window.emit(self.input1.text() + "=" + self.input2.text())
+        except:
+            self.error.setVisible(True)
 
 
 class MainWindow(QtWidgets.QWidget):
