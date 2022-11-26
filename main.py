@@ -1,4 +1,4 @@
-'''
+"""
 Author(s):   Max James, Ebin Paul, Christopher Gavey, Aswin, Soniya
 
 Date:        25/11/22
@@ -30,13 +30,20 @@ History:     V1 - Basic layout for main window of GUI made
 References: https://stackoverflow.com/questions/15263063/why-keypress-event-in-pyqt-does-not-work-for-key-enter
             https://stackoverflow.com/questions/72169262/pyqt5-access-mainwindow-from-another-window
             https://www.geeksforgeeks.org/pyqt5-qtablewidget/
-'''
+"""
 
 from core.interpreter import main_execute
 from core.lexer.lexicalAnalyzer import Lexer
 from core.lexer.token import TokenType
 from PyQt5 import QtWidgets, QtCore, QtGui
-from PyQt5.QtWidgets import QApplication, QLabel, QMainWindow, QTableWidget, QVBoxLayout, QWidget
+from PyQt5.QtWidgets import (
+    QApplication,
+    QLabel,
+    QMainWindow,
+    QTableWidget,
+    QVBoxLayout,
+    QWidget,
+)
 from PyQt5.QtGui import QPixmap, QIcon
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -46,8 +53,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import re  # maybe need to use for data validation/verification
 
-class PlotWindow:
 
+class PlotWindow:
     def __init__(self, function):
 
         # 100 linearly spaced numbers
@@ -67,31 +74,41 @@ class PlotWindow:
 
                 if __tokens[z].type == TokenType.IDENTIFIER:
 
-                    if __tokens[z].value != 'x':  # what happens if we have a variable called x?
-                        string_build = string_build + "(" + str(main_execute(__tokens[z].value)) + ")"
+                    if (
+                        __tokens[z].value != "x"
+                    ):  # what happens if we have a variable called x?
+                        string_build = (
+                            string_build
+                            + "("
+                            + str(main_execute(__tokens[z].value))
+                            + ")"
+                        )
                     else:
                         string_build = string_build + "(" + str(x[i]) + ")"
 
-                elif __tokens[z].type == TokenType.INTEGER or __tokens[z].type == TokenType.FLOAT:
+                elif (
+                    __tokens[z].type == TokenType.INTEGER
+                    or __tokens[z].type == TokenType.FLOAT
+                ):
                     string_build = string_build + "(" + str(__tokens[z].value) + ")"
 
                 else:
-                    string_build = string_build + __tokens[z].value.replace('\'', "")
+                    string_build = string_build + __tokens[z].value.replace("'", "")
 
             y[i] = main_execute(string_build)
 
         # setting the axes at the centre
         fig = plt.figure()
         ax = fig.add_subplot(1, 1, 1)
-        ax.spines['left'].set_position('center')
-        ax.spines['bottom'].set_position('zero')
-        ax.spines['right'].set_color('none')
-        ax.spines['top'].set_color('none')
-        ax.xaxis.set_ticks_position('bottom')
-        ax.yaxis.set_ticks_position('left')
+        ax.spines["left"].set_position("center")
+        ax.spines["bottom"].set_position("zero")
+        ax.spines["right"].set_color("none")
+        ax.spines["top"].set_color("none")
+        ax.xaxis.set_ticks_position("bottom")
+        ax.yaxis.set_ticks_position("left")
 
         # plot the function
-        plt.plot(x, y, 'r')
+        plt.plot(x, y, "r")
         plt.title("Plot for " + function)
         plt.grid()
 
@@ -129,7 +146,7 @@ class PlotInputWindow(QtWidgets.QWidget):
         b1.clicked.connect(self.switch)
         b1.move(125, 70)
 
-        self.error = QtWidgets.QLabel('Red', self)
+        self.error = QtWidgets.QLabel("Red", self)
         self.error.setStyleSheet("color:tomato;")
         self.error.setText("Plot not suitable")
         self.font = self.error.font()
@@ -165,7 +182,7 @@ class SaveWindow(QtWidgets.QWidget):
         b1.clicked.connect(self.switch)
         b1.move(125, 70)
 
-        self.error = QtWidgets.QLabel('Red', self)
+        self.error = QtWidgets.QLabel("Red", self)
         self.error.setStyleSheet("color:tomato;")
         self.error.setText("Script name not suitable")
         font = self.error.font()
@@ -175,7 +192,9 @@ class SaveWindow(QtWidgets.QWidget):
         self.error.setVisible(False)  # Initially set as False, unless error occurs
 
     def switch(self):
-        if re.search(r'^[a-zA-Z0-9]*$', self.name.toPlainText()) == None:  # if there is a space
+        if (
+            re.search(r"^[a-zA-Z0-9]*$", self.name.toPlainText()) == None
+        ):  # if there is a space
             self.error.setVisible(True)
         else:
             self.switch_window.emit(self.name.toPlainText() + ".txt")
@@ -208,7 +227,7 @@ class LoadWindow(QtWidgets.QWidget):
         b1.clicked.connect(self.select)
         b1.move(125, 70)
 
-        self.error = QtWidgets.QLabel('Red', self)
+        self.error = QtWidgets.QLabel("Red", self)
         self.error.setStyleSheet("color:tomato;")
         self.error.setText("No script name selected")
         font = self.error.font()
@@ -268,7 +287,7 @@ class VariableWindow(QtWidgets.QWidget):
         b1.clicked.connect(self.switch)
         b1.move(120, 125)
 
-        self.error = QtWidgets.QLabel('Red', self)
+        self.error = QtWidgets.QLabel("Red", self)
         self.error.setStyleSheet("color:tomato;")
         self.error.setText("Variable not suitable")
         font = self.error.font()
@@ -297,10 +316,12 @@ class MainWindow(QtWidgets.QWidget):
         QtWidgets.QWidget.__init__(self)
         self.setGeometry(100, 100, 1250, 700)
         self.setFixedSize(1250, 700)
-        self.setWindowTitle('MathChamp')
+        self.setWindowTitle("MathChamp")
 
         self.varDict = varHold  # dictionary to hold the variables
-        self.linePos = -1 # Should be -1 (unless loading after sub-window - need to do more)
+        self.linePos = (
+            -1
+        )  # Should be -1 (unless loading after sub-window - need to do more)
 
         # Name at the top of application
         name = QtWidgets.QLabel(self)
@@ -313,7 +334,7 @@ class MainWindow(QtWidgets.QWidget):
 
         # Label at the top of application
         label = QLabel(self)
-        pixmap = QPixmap('./ui/logo.jpg')
+        pixmap = QPixmap("./ui/logo.jpg")
         label.setPixmap(pixmap.scaled(55, 55))
         label.adjustSize()
         label.move(26, 7)
@@ -343,13 +364,13 @@ class MainWindow(QtWidgets.QWidget):
             cursor.insertText(text)
 
         if save != None:
-            with open('./ui/scripts/' + text, 'w') as f:  # Need to fix
+            with open("./ui/scripts/" + text, "w") as f:  # Need to fix
                 f.write(self.scriptBox.toPlainText())
 
             self.outputBox.setText(outputText)
 
         if load != None:
-            with open('./ui/scripts/' + text, 'r') as f:
+            with open("./ui/scripts/" + text, "r") as f:
                 self.scriptBox.setText(f.read())
 
             self.outputBox.setText(outputText)
@@ -357,7 +378,7 @@ class MainWindow(QtWidgets.QWidget):
         if (self.outputBox.toPlainText() + text) == ">> ":
             cursor.insertText(text)
 
-        self.firstPos = cursor.position()-1
+        self.firstPos = cursor.position() - 1
 
         if self.firstPos != 3:
             self.firstPos = pos
@@ -376,19 +397,21 @@ class MainWindow(QtWidgets.QWidget):
         self.table.setColumnWidth(1, 153)
         self.table.resize(337, 447)
         self.table.move(887, 70)
-        self.table.setEditTriggers(QtWidgets.QTableWidget.NoEditTriggers)  # user can't edit variable table
+        self.table.setEditTriggers(
+            QtWidgets.QTableWidget.NoEditTriggers
+        )  # user can't edit variable table
 
         # Buttons
         self.runButton = QtWidgets.QPushButton(self)
         self.runButton.setText("RUN")
-        self.runButton.setIcon(QIcon('./ui/start.jpg'))
+        self.runButton.setIcon(QIcon("./ui/start.jpg"))
         self.runButton.clicked.connect(self.run_script)  # runs text in script window
         self.runButton.resize(70, 75)
         self.runButton.move(1020, 522)
 
         self.stopButton = QtWidgets.QPushButton(self)
         self.stopButton.setText("STOP")
-        self.stopButton.setIcon(QIcon('./ui/stop.jpg'))
+        self.stopButton.setIcon(QIcon("./ui/stop.jpg"))
         # self.stopButton.clicked.connect(clicked)  # connected to a function
         self.stopButton.resize(70, 75)
         self.stopButton.move(1089, 522)
@@ -451,7 +474,7 @@ class MainWindow(QtWidgets.QWidget):
         self.piButton.setText("π")
         self.piButton.clicked.connect(self.pi)  # connected to a function
         self.piButton.resize(50, 31)
-        self.piButton.move(1100, 646) # 1100 646
+        self.piButton.move(1100, 646)  # 1100 646
 
         self.expButton = QtWidgets.QPushButton(self)
         self.expButton.setText("e")
@@ -469,7 +492,7 @@ class MainWindow(QtWidgets.QWidget):
         self.saveButton.setText("Save")
         self.saveButton.clicked.connect(self.save)  # connected to a function
         self.saveButton.resize(60, 31)
-        self.saveButton.move(770, 40) # 820
+        self.saveButton.move(770, 40)  # 820
 
     def sin(self):
         cursor = QtGui.QTextCursor(self.outputBox.document())
@@ -563,15 +586,21 @@ class MainWindow(QtWidgets.QWidget):
 
     def run_script(self):  # For running the main input script
         cursor = self.scriptBox.textCursor()  # Cursor of the input box
-        cursor2 = QtGui.QTextCursor(self.outputBox.document())  # Cursor of the output box
+        cursor2 = QtGui.QTextCursor(
+            self.outputBox.document()
+        )  # Cursor of the output box
 
         if cursor.hasSelection():  # If text is highlighted
             # Output highlighted text on the command line
-            selected = self.scriptBox.toPlainText()[cursor.selectionStart():cursor.selectionEnd()].strip()
+            selected = self.scriptBox.toPlainText()[
+                cursor.selectionStart() : cursor.selectionEnd()
+            ].strip()
             script_type = "Running partial script...\n"
 
         else:
-            selected = self.scriptBox.toPlainText().strip()  # Output whole script on command line
+            selected = (
+                self.scriptBox.toPlainText().strip()
+            )  # Output whole script on command line
             script_type = "Running script...\n"
 
         cursor2.beginEditBlock()
@@ -579,20 +608,36 @@ class MainWindow(QtWidgets.QWidget):
         cursor2.insertText(script_type)  # Output that the whole script is running
 
         for line in selected.splitlines():
-            cursor2.movePosition(QtGui.QTextCursor.End, QtGui.QTextCursor.MoveAnchor)  # moves cursor to end
+            cursor2.movePosition(
+                QtGui.QTextCursor.End, QtGui.QTextCursor.MoveAnchor
+            )  # moves cursor to end
             cursor2.insertText(">> " + line + "\n")
             try:
                 __tokens = Lexer(line).get_tokens()
 
                 if len(__tokens) > 1:
-                    if __tokens[0].type == TokenType.IDENTIFIER and __tokens[1].type == TokenType.ASSIGN:
+                    if (
+                        __tokens[0].type == TokenType.IDENTIFIER
+                        and __tokens[1].type == TokenType.ASSIGN
+                    ):
 
                         self.varDict[__tokens[0].value] = str(main_execute(line))
 
                         for i in range(len(self.varDict.keys())):
-                            self.table.setItem(i, 0, QtWidgets.QTableWidgetItem(list(self.varDict.keys())[i]))
-                            self.table.setItem(i, 1, QtWidgets.QTableWidgetItem(
-                                str(self.varDict.get(list(self.varDict.keys())[i]))))
+                            self.table.setItem(
+                                i,
+                                0,
+                                QtWidgets.QTableWidgetItem(
+                                    list(self.varDict.keys())[i]
+                                ),
+                            )
+                            self.table.setItem(
+                                i,
+                                1,
+                                QtWidgets.QTableWidgetItem(
+                                    str(self.varDict.get(list(self.varDict.keys())[i]))
+                                ),
+                            )
 
                     else:
                         cursor2.insertText(str(main_execute(line)) + "\n")
@@ -601,15 +646,23 @@ class MainWindow(QtWidgets.QWidget):
                     cursor2.insertText(str(main_execute(line)) + "\n")
 
             except:
-                cursor2.insertText("ERROR: Issue at line " + str(selected.splitlines().index(line)+1) + "\n")
+                cursor2.insertText(
+                    "ERROR: Issue at line "
+                    + str(selected.splitlines().index(line) + 1)
+                    + "\n"
+                )
                 break
 
         cursor2.insertText(">> ")
-        self.firstPos = cursor2.position()  # records first position of cursor line (for string output)
+        self.firstPos = (
+            cursor2.position()
+        )  # records first position of cursor line (for string output)
         cursor2.endEditBlock()
 
         self.savedPlainText = self.outputBox.toPlainText()  # Save the plain text
-        self.savedHtmlText = self.outputBox.toHtml()  # Save the HTML (i.e. if text bolded, coloured etc)
+        self.savedHtmlText = (
+            self.outputBox.toHtml()
+        )  # Save the HTML (i.e. if text bolded, coloured etc)
 
     def variable(self):
         self.switch_window.emit()
@@ -632,7 +685,9 @@ class MainWindow(QtWidgets.QWidget):
                 if self.savedPlainText.strip() == self.outputBox.toPlainText().strip():
                     cursor = QtGui.QTextCursor(self.outputBox.document())
                     cursor.beginEditBlock()
-                    cursor.movePosition(QtGui.QTextCursor.End, QtGui.QTextCursor.MoveAnchor)
+                    cursor.movePosition(
+                        QtGui.QTextCursor.End, QtGui.QTextCursor.MoveAnchor
+                    )
                     cursor.insertText("\n>> ")
                     cursor.endEditBlock()
 
@@ -653,9 +708,13 @@ class MainWindow(QtWidgets.QWidget):
 
                 # ReGeX here - Implement this? Or maybe implement cursor.position() better? Look into this...
                 # Not super amused with implementation here...
-                line = self.outputBox.toPlainText()[self.firstPos: self.lastPos].replace('>>','').strip()
+                line = (
+                    self.outputBox.toPlainText()[self.firstPos : self.lastPos]
+                    .replace(">>", "")
+                    .strip()
+                )
 
-                if line=='clear':
+                if line == "clear":
                     self.outputBox.setText("")
                     cursor.insertText(">> ")
                     self.firstPos = cursor.position()
@@ -667,13 +726,32 @@ class MainWindow(QtWidgets.QWidget):
                         __tokens = Lexer(line).get_tokens()
 
                         if len(__tokens) > 1:
-                            if __tokens[0].type == TokenType.IDENTIFIER and __tokens[1].type == TokenType.ASSIGN:
+                            if (
+                                __tokens[0].type == TokenType.IDENTIFIER
+                                and __tokens[1].type == TokenType.ASSIGN
+                            ):
 
                                 self.varDict[__tokens[0].value] = str(execution)
 
                                 for i in range(len(self.varDict.keys())):
-                                    self.table.setItem(i, 0, QtWidgets.QTableWidgetItem(list(self.varDict.keys())[i]))
-                                    self.table.setItem(i, 1, QtWidgets.QTableWidgetItem(str(self.varDict.get(list(self.varDict.keys())[i]))))
+                                    self.table.setItem(
+                                        i,
+                                        0,
+                                        QtWidgets.QTableWidgetItem(
+                                            list(self.varDict.keys())[i]
+                                        ),
+                                    )
+                                    self.table.setItem(
+                                        i,
+                                        1,
+                                        QtWidgets.QTableWidgetItem(
+                                            str(
+                                                self.varDict.get(
+                                                    list(self.varDict.keys())[i]
+                                                )
+                                            )
+                                        ),
+                                    )
 
                             else:
                                 cursor.insertText("\n" + str(execution))
@@ -710,35 +788,54 @@ class Controller:
         try:
             self.window.close()
         except:
-            self.window=None
+            self.window = None
 
         try:
             # IN DEVELOPMENT
-            if re.search(r'^[a-zA-Z0-9]*$', self.saveWin.name.toPlainText())  == None:  # if there is a space
+            if (
+                re.search(r"^[a-zA-Z0-9]*$", self.saveWin.name.toPlainText()) == None
+            ):  # if there is a space
                 self.saveWin.error.setVisible(True)
-            #else:
-                #self.saveWin.close()
+            # else:
+            # self.saveWin.close()
         except:
-            self.saveWin=None
+            self.saveWin = None
             # IN DEVELOPMENT
 
         try:
             self.loadWin.close()
         except:
-            self.loadWin=None
+            self.loadWin = None
 
         if self.window != None:
             self.outputBoxText = self.main.savedPlainText
             text = self.outputBoxText + text
 
-        self.main = MainWindow(text, self.outputBoxText, self.inputBoxText, self.pos, self.varDict, self.window, self.saveWin, self.loadWin)
+        self.main = MainWindow(
+            text,
+            self.outputBoxText,
+            self.inputBoxText,
+            self.pos,
+            self.varDict,
+            self.window,
+            self.saveWin,
+            self.loadWin,
+        )
         self.window = None
         self.saveWin = None
         self.loadWin = None
 
         for i in range(len(self.varDict.keys())):
-            self.main.table.setItem(i, 0, QtWidgets.QTableWidgetItem(list(self.varDict.keys())[i]))
-            self.main.table.setItem(i, 1, QtWidgets.QTableWidgetItem(str(self.varDict.get(list(self.varDict.keys())[i]))))
+            self.main.table.setItem(
+                i, 0, QtWidgets.QTableWidgetItem(list(self.varDict.keys())[i])
+            )
+            self.main.table.setItem(
+                i,
+                1,
+                QtWidgets.QTableWidgetItem(
+                    str(self.varDict.get(list(self.varDict.keys())[i]))
+                ),
+            )
 
         self.main.switch_window.connect(self.show_var)
         self.main.switch_window2.connect(self.show_save)
@@ -757,7 +854,6 @@ class Controller:
 
         self.pinputWin.switch_window.connect(self.show_plot)
         self.pinputWin.show()
-
 
     def show_plot(self, text):
 
@@ -813,5 +909,6 @@ def main():
     controller.show_main()
     sys.exit(app.exec_())
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

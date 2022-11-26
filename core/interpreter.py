@@ -1,4 +1,5 @@
 from core.parser.nodes import Token, TokenType
+
 from .lexer.lexicalAnalyzer import Lexer
 from .parser.syntaxAnalyzer import Parser
 

@@ -1,11 +1,20 @@
-from string import ascii_lowercase, ascii_uppercase
+"""
+AUTHOR: Ebin Paul
+DESCRIPTION: The following Lexer class goes through the input string and generates a list of tokens.
+            
+REFERENCES: https://ruslanspivak.com/lsbasi-part7/
+            https://ruslanspivak.com/lsbasi-part8/
+            https://dev.to/j0nimost/implementing-a-math-interpreter-using-c-part2-lexer-4i81
+"""
+
+from string import ascii_lowercase, ascii_uppercase, digits
 
 from .token import Token, TokenType
 
 WHITESPACE = " \t"
 ALLOWED_IDENTIFIERS = "".join(tuple(ascii_lowercase)) + "".join(tuple(ascii_uppercase))
-ALLOWED_CHARACTERS = "0123456789+-/*%()^=. \n\t" + ALLOWED_IDENTIFIERS
-ALLOWED_OP_CHARACTERS = ("+", "-", "/", "*", "%", "(", ")", "^", "%", "=")
+ALLOWED_CHARACTERS = digits + "+-/*%()^=.<> \n\t" + ALLOWED_IDENTIFIERS
+ALLOWED_OP_CHARACTERS = ("+", "-", "/", "*", "%", "(", ")", "^", "%", "=", "<", ">")
 OP_TOKEN_TYPE = (
     TokenType.MULTIPLY,
     TokenType.PLUS,
@@ -15,6 +24,8 @@ OP_TOKEN_TYPE = (
     TokenType.CARET,
     TokenType.MODULO,
     TokenType.ASSIGN,
+    TokenType.LT,
+    TokenType.GT,
 )
 OPERAND_TOKEN_TYPE = (TokenType.INTEGER, TokenType.FLOAT)
 
@@ -178,7 +189,7 @@ class Lexer:
                             raise Exception("Invalid expression")
 
                         # if the last token in token list
-                        # is one of the TokenTypes other than INTEGER and FLOAT
+                        # is one of the TokenType is other than IDENTIFIER
                         # then raise an exception
                         elif (
                             self.__tokens[-1].type in OP_TOKEN_TYPE
@@ -187,6 +198,38 @@ class Lexer:
                             raise Exception("Invalid expression")
                         else:
                             self.__tokens.append(Token(TokenType.ASSIGN, "'='"))
+
+                    elif character == "<":
+                        # if token list is empty and,
+                        # the first character encountered is plus
+                        # then raise an exception
+                        if not self.__tokens:
+                            raise Exception("Invalid expression")
+
+                        # if the last token in token list
+                        # is one of the TokenTypes other than INTEGER , FLOAT and IDENTIFIER
+                        # then raise an exception
+                        elif self.__tokens[-1].type in OP_TOKEN_TYPE:
+                            raise Exception("Invalid expression")
+
+                        else:
+                            self.__tokens.append(Token(TokenType.LT, "'<'"))
+
+                    elif character == ">":
+                        # if token list is empty and,
+                        # the first character encountered is plus
+                        # then raise an exception
+                        if not self.__tokens:
+                            raise Exception("Invalid expression")
+
+                        # if the last token in token list
+                        # is one of the TokenTypes other than INTEGER , FLOAT and IDENTIFIER
+                        # then raise an exception
+                        elif self.__tokens[-1].type in OP_TOKEN_TYPE:
+                            raise Exception("Invalid expression")
+
+                        else:
+                            self.__tokens.append(Token(TokenType.GT, "'>'"))
 
             # if number string is not empty once loop ends,then add the integer token to the list
             if number_string:

@@ -1,3 +1,18 @@
+"""
+AUTHOR: Ebin Paul
+DESCRIPTION: The following class is used to create an Abstract Syntax Tree (AST). The operators with higher precedence
+            are the located lower in the tree mean while, operators with lower precedence are located higher in the tree.
+            
+REFERENCES: https://ruslanspivak.com/lsbasi-part3/
+            https://ruslanspivak.com/lsbasi-part4/
+            https://ruslanspivak.com/lsbasi-part5/
+            https://ruslanspivak.com/lsbasi-part7/
+            https://ruslanspivak.com/lsbasi-part8/
+            https://dev.to/j0nimost/making-a-math-interpreter-ast-4848
+            https://dev.to/j0nimost/making-a-math-interpreter-parser-52j8
+"""
+
+
 from core.lexer.token import Token, TokenType
 
 from .nodes import IdentifierNode, OperandNode, OperatorNode
@@ -5,11 +20,11 @@ from .nodes import IdentifierNode, OperandNode, OperatorNode
 """
 BNF :-
 
-    <expression> -> <term> [(+ | -) <term>]*
-    <term> -> <term> [(* | / | %) <power>]*
-    <power> -> <factor> ^ <power> | <factor>
-    <factor> -> <number> |  (expression) 
-    <number> -> <int> <float> | <digit>
+    <expression> := <term> [(+ | -) <term>]*
+    <term> := <term> [(* | / | %) <power>]*
+    <power> := <factor> ^ <power> | <factor>
+    <factor> := <number> |  (expression) 
+    <number> := <int> <float> | <digit>
 """
 
 
@@ -134,9 +149,23 @@ class Parser:
 
         return result
 
-    def assignment(self):
-
+    def comparison(self):
+        """ """
         result = self.expression()
+        while (
+            self.current_token.type != TokenType.END
+            and self.current_token
+            and self.current_token.type in (TokenType.LT, TokenType.GT)
+        ):
+            operator = self.current_token
+            self.next_token()
+            result = OperatorNode(result, operator, self.expression())
+
+        return result
+
+    def assignment(self):
+        """ """
+        result = self.comparison()
         while (
             self.current_token.type != TokenType.END
             and self.current_token
@@ -144,7 +173,7 @@ class Parser:
         ):
             operator = self.current_token
             self.next_token()
-            result = OperatorNode(result, operator, self.expression())
+            result = OperatorNode(result, operator, self.comparison())
 
         return result
 
@@ -153,10 +182,6 @@ class Parser:
         Parses the tokens list and returns an AST (Abstract Syntax Tree)
         """
         result = self.assignment()
-
-        # checking if opened Parentheses are closed
-        # if self.parenthesis_count % 2 != 0:
-        #     raise Exception("Missing parenthesis")
 
         if self.parenthesis_stack:
             raise Exception("Missing parenthesis")
