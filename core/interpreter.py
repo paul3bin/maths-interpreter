@@ -11,11 +11,3 @@ class Interpreter:
 
     def execute(self):
         return self.__root_node.get_node_value()
-
-
-def main_execute(input_string: str):
-    interpreter = Interpreter(input_string)
-
-    result = interpreter.execute()
-
-    return result

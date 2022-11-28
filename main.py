@@ -32,10 +32,16 @@ References: https://stackoverflow.com/questions/15263063/why-keypress-event-in-p
             https://www.geeksforgeeks.org/pyqt5-qtablewidget/
 """
 
-from core.interpreter import main_execute
-from core.lexer.lexicalAnalyzer import Lexer
-from core.lexer.token import TokenType
-from PyQt5 import QtWidgets, QtCore, QtGui
+import re  # maybe need to use for data validation/verification
+import sys
+from os import listdir
+
+import matplotlib.pyplot as plt
+import numpy as np
+from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtWidgets import (
     QApplication,
     QLabel,
@@ -44,14 +50,10 @@ from PyQt5.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
-from PyQt5.QtGui import QPixmap, QIcon
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from os import listdir
-import sys
-import matplotlib.pyplot as plt
-import numpy as np
-import re  # maybe need to use for data validation/verification
+
+from core import main_execute
+from core.lexer.lexicalAnalyzer import Lexer
+from core.lexer.token import TokenType
 
 
 class PlotWindow:
