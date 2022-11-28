@@ -1,4 +1,5 @@
 from core.parser.nodes import Token, TokenType
+
 from .lexer.lexicalAnalyzer import Lexer
 from .parser.syntaxAnalyzer import Parser
 
@@ -10,11 +11,3 @@ class Interpreter:
 
     def execute(self):
         return self.__root_node.get_node_value()
-
-
-def main(input_string: str):
-    interpreter = Interpreter(input_string)
-
-    result = interpreter.execute()
-
-    return result

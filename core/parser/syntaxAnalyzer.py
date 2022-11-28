@@ -1,10 +1,29 @@
+"""
+AUTHOR: Ebin, Aswin
+DESCRIPTION: The following class is used to create an Abstract Syntax Tree (AST). The operators with higher precedence
+            are the located lower in the tree mean while, operators with lower precedence are located higher in the tree.
+            
+REFERENCES: https://pages.cs.wisc.edu/~fischer/cs536.s06/course.hold/html/NOTES/4.SYNTAX-DIRECTED-TRANSLATION.html#astVsParse
+            https://en.cppreference.com/w/cpp/language/operator_precedence
+            https://cs.wmich.edu/~gupta/teaching/cs4850/sumII06/The%20syntax%20of%20C%20in%20Backus-Naur%20form.htm
+            https://ruslanspivak.com/lsbasi-part3/
+            https://ruslanspivak.com/lsbasi-part4/
+            https://ruslanspivak.com/lsbasi-part5/
+            https://ruslanspivak.com/lsbasi-part7/
+            https://ruslanspivak.com/lsbasi-part8/
+            https://dev.to/j0nimost/making-a-math-interpreter-ast-4848
+            https://dev.to/j0nimost/making-a-math-interpreter-parser-52j8
+"""
+
+
 from core.lexer.token import Token, TokenType
 
 from .nodes import IdentifierNode, OperandNode, OperatorNode
 
 """
 BNF :-
-
+    <assignment> -> <variable> = <expression>
+    <relational> -> <expression> [(< | >)] <expression>
     <expression> -> <term> [(+ | -) <term>]*
     <term> -> <term> [(* | / | %) <power>]*
     <power> -> <factor> ^ <power> | <factor>
@@ -18,7 +37,7 @@ class Parser:
         self.__tokens = tokens
         self.current_token: Token = None
         self.position = 0
-        self.parenthesis_count = 0
+        self.parenthesis_stack = []
         self.next_token()
 
     def next_token(self):
@@ -31,11 +50,14 @@ class Parser:
                 self.current_token = self.__tokens[self.position]
                 self.position += 1
 
-                if self.current_token.type in (
-                    TokenType.LEFT_PARENTHESIS,
-                    TokenType.RIGHT_PARENTHESIS,
-                ):
-                    self.parenthesis_count += 1
+                if self.current_token.type == TokenType.LEFT_PARENTHESIS:
+                    self.parenthesis_stack.append(")")
+
+                elif self.current_token.type == TokenType.RIGHT_PARENTHESIS:
+                    try:
+                        self.parenthesis_stack.pop()
+                    except:
+                        raise Exception("Missing parenthesis")
 
         except:
             raise Exception("Invalid expression.")
@@ -131,9 +153,29 @@ class Parser:
 
         return result
 
-    def assignment(self):
-
+    def comparison(self):
+        """
+        BNF for relational operators
+        <relational> -> <expression> [(< | >)] <expression>
+        """
         result = self.expression()
+        while (
+            self.current_token.type != TokenType.END
+            and self.current_token
+            and self.current_token.type in (TokenType.LT, TokenType.GT)
+        ):
+            operator = self.current_token
+            self.next_token()
+            result = OperatorNode(result, operator, self.expression())
+
+        return result
+
+    def assignment(self):
+        """
+        BNF for assignment
+        <assignment> -> <variable> = <expression>
+        """
+        result = self.comparison()
         while (
             self.current_token.type != TokenType.END
             and self.current_token
@@ -141,7 +183,7 @@ class Parser:
         ):
             operator = self.current_token
             self.next_token()
-            result = OperatorNode(result, operator, self.expression())
+            result = OperatorNode(result, operator, self.comparison())
 
         return result
 
@@ -151,8 +193,7 @@ class Parser:
         """
         result = self.assignment()
 
-        # checking if opened Parentheses are closed
-        if self.parenthesis_count % 2 != 0:
+        if self.parenthesis_stack:
             raise Exception("Missing parenthesis")
 
         return result

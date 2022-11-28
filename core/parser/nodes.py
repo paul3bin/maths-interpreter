@@ -1,3 +1,14 @@
+"""
+AUTHOR: Ebin, Aswin
+DESCRIPTION: The following classes are nodes of Abstract Syntax Tree (AST). Each class has a get_node_value method which returns,
+            the value of that particular node
+            
+REFERENCES: https://ruslanspivak.com/lsbasi-part7/
+            https://ruslanspivak.com/lsbasi-part8/
+            https://dev.to/j0nimost/making-a-math-interpreter-ast-4848
+            https://dev.to/j0nimost/making-a-math-interpreter-parser-52j8
+"""
+
 from core.lexer.token import Token, TokenType
 
 SYMBOL_TABLE = {}
@@ -42,7 +53,7 @@ class IdentifierNode:
 
 class OperatorNode:
     """
-    Class definition for Operator (+, -, *, /) node
+    Class definition for Operator (+, -, *, /, ^, %, <, >, =) node
 
     The left node can either be an operator node or an operand node.
     """
@@ -94,6 +105,12 @@ class OperatorNode:
 
         elif self.operator.type == TokenType.MODULO:
             return self.left_node.get_node_value() % self.right_node.get_node_value()
+
+        elif self.operator.type == TokenType.LT:
+            return self.left_node.get_node_value() < self.right_node.get_node_value()
+
+        elif self.operator.type == TokenType.GT:
+            return self.left_node.get_node_value() > self.right_node.get_node_value()
 
         elif self.operator.type == TokenType.ASSIGN:
             SYMBOL_TABLE[str(self.left_node)] = self.right_node.get_node_value()
