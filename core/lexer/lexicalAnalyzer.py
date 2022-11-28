@@ -1,5 +1,5 @@
 """
-AUTHOR: Ebin Paul
+AUTHOR: Ebin, Aswin
 DESCRIPTION: The following Lexer class goes through the input string and generates a list of tokens.
             
 REFERENCES: https://ruslanspivak.com/lsbasi-part7/

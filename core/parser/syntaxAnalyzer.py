@@ -1,9 +1,12 @@
 """
-AUTHOR: Ebin Paul
+AUTHOR: Ebin, Aswin
 DESCRIPTION: The following class is used to create an Abstract Syntax Tree (AST). The operators with higher precedence
             are the located lower in the tree mean while, operators with lower precedence are located higher in the tree.
             
-REFERENCES: https://ruslanspivak.com/lsbasi-part3/
+REFERENCES: https://pages.cs.wisc.edu/~fischer/cs536.s06/course.hold/html/NOTES/4.SYNTAX-DIRECTED-TRANSLATION.html#astVsParse
+            https://en.cppreference.com/w/cpp/language/operator_precedence
+            https://cs.wmich.edu/~gupta/teaching/cs4850/sumII06/The%20syntax%20of%20C%20in%20Backus-Naur%20form.htm
+            https://ruslanspivak.com/lsbasi-part3/
             https://ruslanspivak.com/lsbasi-part4/
             https://ruslanspivak.com/lsbasi-part5/
             https://ruslanspivak.com/lsbasi-part7/
@@ -19,12 +22,13 @@ from .nodes import IdentifierNode, OperandNode, OperatorNode
 
 """
 BNF :-
-
-    <expression> := <term> [(+ | -) <term>]*
-    <term> := <term> [(* | / | %) <power>]*
-    <power> := <factor> ^ <power> | <factor>
-    <factor> := <number> |  (expression) 
-    <number> := <int> <float> | <digit>
+    <assignment> -> <variable> = <expression>
+    <relational> -> <expression> [(< | >)] <expression>
+    <expression> -> <term> [(+ | -) <term>]*
+    <term> -> <term> [(* | / | %) <power>]*
+    <power> -> <factor> ^ <power> | <factor>
+    <factor> -> <number> |  (expression) 
+    <number> -> <int> <float> | <digit>
 """
 
 
@@ -150,7 +154,10 @@ class Parser:
         return result
 
     def comparison(self):
-        """ """
+        """
+        BNF for relational operators
+        <relational> -> <expression> [(< | >)] <expression>
+        """
         result = self.expression()
         while (
             self.current_token.type != TokenType.END
@@ -164,7 +171,10 @@ class Parser:
         return result
 
     def assignment(self):
-        """ """
+        """
+        BNF for assignment
+        <assignment> -> <variable> = <expression>
+        """
         result = self.comparison()
         while (
             self.current_token.type != TokenType.END
