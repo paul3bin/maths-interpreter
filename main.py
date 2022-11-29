@@ -1,7 +1,7 @@
 """
 Author(s):   Max James, Ebin Paul, Christopher Gavey, Aswin, Soniya
 
-Date:        25/11/22
+Date:        26/11/22
 
 Description: The graphical user interface for the maths interpreter software. This works by taking strings from the input
              boxes and then feeding them into the interpreter (going through the lexer, parser, and execution pass).
@@ -16,7 +16,7 @@ Description: The graphical user interface for the maths interpreter software. Th
              extra windows for opening a file, saving a file, and for writing in the f(x) function before displaying the
              Matplotlib plot.
 
-Version:     V3
+Version:     V4.2
 
 History:     V1 - Basic layout for main window of GUI made
              V1.1 - Basic outline for variable assignment window made
@@ -26,24 +26,22 @@ History:     V1 - Basic layout for main window of GUI made
              V2.1 - Bug fixes to the code
              V3 - Implementing the ability to add a plot
              V3.1 - Data validation added for all the windows (might need to update for save window)
+             V4 - Variable dependencies added
+             V4.1 - Small bug fixes to the variable dependencies, removing dependencies when re-defined
+             V4.2 - Made changes to PlotInputWindow, to include intervals
 
 References: https://stackoverflow.com/questions/15263063/why-keypress-event-in-pyqt-does-not-work-for-key-enter
             https://stackoverflow.com/questions/72169262/pyqt5-access-mainwindow-from-another-window
             https://www.geeksforgeeks.org/pyqt5-qtablewidget/
+            https://zetcode.com/gui/pyqt5/layout/
+            https://doc.qt.io/qtforpython/overviews/layout.html
 """
 
 from core.interpreter import main_execute
 from core.lexer.lexicalAnalyzer import Lexer
 from core.lexer.token import TokenType
 from PyQt5 import QtWidgets, QtCore, QtGui
-from PyQt5.QtWidgets import (
-    QApplication,
-    QLabel,
-    QMainWindow,
-    QTableWidget,
-    QVBoxLayout,
-    QWidget,
-)
+from PyQt5.QtWidgets import QApplication, QLabel, QMainWindow, QTableWidget, QVBoxLayout, QWidget
 from PyQt5.QtGui import QPixmap, QIcon
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -53,49 +51,54 @@ import matplotlib.pyplot as plt
 import numpy as np
 import re  # maybe need to use for data validation/verification
 
+# QUESTIONS:
+# What happens if we have a variable called x?
+# What happens if we have a variable called 'clear'?
+# Is the 'first' and 'last' value correct in plot?
+# ISSUE: if we do assignment and then random numbers still works e.g. "var1=2343sdfs", will save as "2343"
+
+# TO DO:
+# Look more in ReGex for data validation
+# Scroll/zoom-in for plot
+# Add variable dependencies to scripts
+# Make it responsive/work on Windows
+# Clean code
 
 class PlotWindow:
+     # https://mpl-interactions.readthedocs.io/en/stable/examples/zoom-factory.html
+
     def __init__(self, function):
 
-        # 100 linearly spaced numbers
-        first = -5
-        last = 5
+        function = function.split("|")
 
-        x = np.linspace(first, last, 100)
-        y = np.zeros(100)
+        # linearly spaced numbers from 'function[1]' to 'function[2]'
+        x = np.linspace(int(function[1]), int(function[2]), 100)  # 100 of these values
+        y = np.zeros(100)  # y list of the same length
 
         for i in range(len(x)):
-            __tokens = Lexer(function).get_tokens()
+            __tokens = Lexer(function[0]).get_tokens()  # get the tokens of inputted function
 
             # Check if the form 5x is there - Additional feature
 
-            string_build = ""
-            for z in range(len(__tokens)):
+            string_build = ""  # builds string that's read into interpreter
+            for z in range(len(__tokens)):  # for every token in string
 
-                if __tokens[z].type == TokenType.IDENTIFIER:
+                if __tokens[z].type == TokenType.IDENTIFIER:  # if token is an identifier
 
-                    if (
-                        __tokens[z].value != "x"
-                    ):  # what happens if we have a variable called x?
-                        string_build = (
-                            string_build
-                            + "("
-                            + str(main_execute(__tokens[z].value))
-                            + ")"
-                        )
+                    if __tokens[z].value != "x":  # if identifier is 'x'
+                        # replace with variable value
+                        string_build = (string_build+"("+str(main_execute(__tokens[z].value))+")")
                     else:
-                        string_build = string_build + "(" + str(x[i]) + ")"
+                        string_build = string_build + "(" + str(x[i]) + ")" # replace value within 'x' list
 
-                elif (
-                    __tokens[z].type == TokenType.INTEGER
-                    or __tokens[z].type == TokenType.FLOAT
-                ):
+                elif __tokens[z].type == TokenType.INTEGER or __tokens[z].type == TokenType.FLOAT:
+                    # puts numbers in brackets to ensure BODMAS
                     string_build = string_build + "(" + str(__tokens[z].value) + ")"
+                else:  # if it's not any of the three aformentioned token types
+                    string_build = string_build + __tokens[z].value.replace("'", "")  # add to string
 
-                else:
-                    string_build = string_build + __tokens[z].value.replace("'", "")
-
-            y[i] = main_execute(string_build)
+            #print(string_build)
+            y[i] = main_execute(string_build)  # calculate and add to y at correct index
 
         # setting the axes at the centre
         fig = plt.figure()
@@ -109,7 +112,8 @@ class PlotWindow:
 
         # plot the function
         plt.plot(x, y, "r")
-        plt.title("Plot for " + function)
+        plt.title("Plot for " + function[0])
+
         plt.grid()
 
         # show the plot
@@ -121,8 +125,8 @@ class PlotInputWindow(QtWidgets.QWidget):
 
     def __init__(self):
         QtWidgets.QWidget.__init__(self)
-        self.setGeometry(550, 370, 350, 130)  # Size of the window
-        self.setFixedSize(350, 130)
+        self.setGeometry(550, 370, 350, 165)  # Size of the window
+        self.setFixedSize(350, 165)
         name = QtWidgets.QLabel(self)
         name.setText("<b>Plot Input</b>")
         font = name.font()
@@ -137,14 +141,36 @@ class PlotInputWindow(QtWidgets.QWidget):
         name.setFont(font)
         name.move(90, 45)
 
+        name2 = QtWidgets.QLabel(self)
+        name2.setText("Interval = ")
+        font = name2.font()
+        font.setPointSize(15)
+        name2.setFont(font)
+        name2.move(48, 82)
+
+        name3 = QtWidgets.QLabel(self)
+        name3.setText("to")
+        font = name3.font()
+        font.setPointSize(15)
+        name3.setFont(font)
+        name3.move(153, 82)
+
         self.inputBox = QtWidgets.QTextEdit(self)
         self.inputBox.move(120, 40)
         self.inputBox.resize(140, 30)
 
+        self.inputBox_left = QtWidgets.QTextEdit(self)
+        self.inputBox_left.move(120, 75)
+        self.inputBox_left.resize(30, 30)
+
+        self.inputBox_right = QtWidgets.QTextEdit(self)
+        self.inputBox_right.move(170, 75)
+        self.inputBox_right.resize(30, 30)
+
         b1 = QtWidgets.QPushButton(self)
         b1.setText("Submit")
         b1.clicked.connect(self.switch)
-        b1.move(125, 70)
+        b1.move(125, 110)
 
         self.error = QtWidgets.QLabel("Red", self)
         self.error.setStyleSheet("color:tomato;")
@@ -152,11 +178,11 @@ class PlotInputWindow(QtWidgets.QWidget):
         self.font = self.error.font()
         self.font.setPointSize(14)
         self.error.setFont(font)
-        self.error.move(115, 102)
+        self.error.move(115, 140)
         self.error.setVisible(False)  # Initially set as False, unless error occurs
 
     def switch(self):
-        self.switch_window.emit(self.inputBox.toPlainText())
+        self.switch_window.emit(self.inputBox.toPlainText()+"|"+self.inputBox_left.toPlainText()+"|"+self.inputBox_right.toPlainText())
 
 
 class SaveWindow(QtWidgets.QWidget):
@@ -312,16 +338,18 @@ class MainWindow(QtWidgets.QWidget):
     switch_window3 = QtCore.pyqtSignal()
     switch_window4 = QtCore.pyqtSignal()
 
-    def __init__(self, text, outputText, scriptText, pos, varHold, var, save, load):
+    def __init__(self, text, outputText, scriptText, pos, varHold, varDec, varDep, var, save, load):
         QtWidgets.QWidget.__init__(self)
         self.setGeometry(100, 100, 1250, 700)
         self.setFixedSize(1250, 700)
         self.setWindowTitle("MathChamp")
 
+        # might need to be changed later
+        self.varDec = varDec  # needs to be stored early
+        self.varDependencies = varDep
+
         self.varDict = varHold  # dictionary to hold the variables
-        self.linePos = (
-            -1
-        )  # Should be -1 (unless loading after sub-window - need to do more)
+        self.linePos = -1  # Should be -1 (unless loading after sub-window - need to do more)
 
         # Name at the top of application
         name = QtWidgets.QLabel(self)
@@ -329,7 +357,7 @@ class MainWindow(QtWidgets.QWidget):
         font = name.font()
         font.setPointSize(40)
         name.setFont(font)
-        name.resize(235, 60)
+        name.resize(275, 60)
         name.move(90, 0)
 
         # Label at the top of application
@@ -434,6 +462,12 @@ class MainWindow(QtWidgets.QWidget):
         self.sinButton.resize(50, 31)
         self.sinButton.move(1020, 619)
 
+        self.logxButton = QtWidgets.QPushButton(self)
+        self.logxButton.setText("logx")
+        self.logxButton.clicked.connect(self.logx)  # connected to a function
+        self.logxButton.resize(50, 31)
+        self.logxButton.move(1020, 646)
+
         self.cosButton = QtWidgets.QPushButton(self)
         self.cosButton.setText("cos")
         self.cosButton.clicked.connect(self.cos)  # connected to a function
@@ -457,12 +491,6 @@ class MainWindow(QtWidgets.QWidget):
         self.lnButton.clicked.connect(self.ln)  # connected to a function
         self.lnButton.resize(50, 31)
         self.lnButton.move(1180, 619)
-
-        self.logxButton = QtWidgets.QPushButton(self)
-        self.logxButton.setText("logx")
-        self.logxButton.clicked.connect(self.logx)  # connected to a function
-        self.logxButton.resize(50, 31)
-        self.logxButton.move(1020, 646)
 
         self.log10Button = QtWidgets.QPushButton(self)
         self.log10Button.setText("log10")
@@ -685,9 +713,7 @@ class MainWindow(QtWidgets.QWidget):
                 if self.savedPlainText.strip() == self.outputBox.toPlainText().strip():
                     cursor = QtGui.QTextCursor(self.outputBox.document())
                     cursor.beginEditBlock()
-                    cursor.movePosition(
-                        QtGui.QTextCursor.End, QtGui.QTextCursor.MoveAnchor
-                    )
+                    cursor.movePosition(QtGui.QTextCursor.End, QtGui.QTextCursor.MoveAnchor)
                     cursor.insertText("\n>> ")
                     cursor.endEditBlock()
 
@@ -726,16 +752,41 @@ class MainWindow(QtWidgets.QWidget):
                         __tokens = Lexer(line).get_tokens()
 
                         if len(__tokens) > 1:
-                            if (
-                                __tokens[0].type == TokenType.IDENTIFIER
-                                and __tokens[1].type == TokenType.ASSIGN
-                            ):
+                            if (__tokens[0].type == TokenType.IDENTIFIER and __tokens[1].type == TokenType.ASSIGN):
+
+                                # if not already in dictionary keys:
+                                if __tokens[0].value not in list(self.varDict.keys()):
+                                    self.varDependencies[__tokens[0].value] = []
+                                else:  # need to execute for dependencies
+                                    print("Dependencies:")
+                                    for i in self.varDependencies[__tokens[0].value]:
+                                        self.varDict[i] = main_execute(self.varDec[i])
 
                                 self.varDict[__tokens[0].value] = str(execution)
 
+                                if __tokens[0].value in self.varDec.keys():
+                                    for i in self.varDependencies:
+                                        if __tokens[0].value in self.varDependencies[i]:
+                                            self.varDependencies[i].remove(__tokens[0].value)
+
+                                self.varDec[__tokens[0].value] = line  # stores the assignment line of variable
+
+                                # Save the line where variable is defined
+                                # Store variable dependencies
+
+                                print("---")
+                                for i in range(len(__tokens[2:])):
+                                    # i+2 to not include the identifier at the start of assignment
+
+                                    if TokenType.IDENTIFIER == __tokens[i+2].type:  # if there is another variable after assign
+                                        if __tokens[0].value not in self.varDependencies[__tokens[i+2].value]:  # if not already in list
+                                            self.varDependencies[__tokens[i+2].value].append(__tokens[0].value)  # add to list for variables
+
+                                print(self.varDependencies)
+
+                                # Adding dictionary values to graphical table
                                 for i in range(len(self.varDict.keys())):
-                                    self.table.setItem(
-                                        i,
+                                    self.table.setItem(i,
                                         0,
                                         QtWidgets.QTableWidgetItem(
                                             list(self.varDict.keys())[i]
@@ -778,6 +829,8 @@ class Controller:
     inputBoxText = ""
     pos = 0
     varDict = {}
+    varDec = {}
+    varDependencies = {}
 
     def __init__(self):
         pass
@@ -811,31 +864,14 @@ class Controller:
             self.outputBoxText = self.main.savedPlainText
             text = self.outputBoxText + text
 
-        self.main = MainWindow(
-            text,
-            self.outputBoxText,
-            self.inputBoxText,
-            self.pos,
-            self.varDict,
-            self.window,
-            self.saveWin,
-            self.loadWin,
-        )
+        self.main = MainWindow(text,self.outputBoxText,self.inputBoxText,self.pos,self.varDict, self.varDec, self.varDependencies, self.window,self.saveWin,self.loadWin)
         self.window = None
         self.saveWin = None
         self.loadWin = None
 
         for i in range(len(self.varDict.keys())):
-            self.main.table.setItem(
-                i, 0, QtWidgets.QTableWidgetItem(list(self.varDict.keys())[i])
-            )
-            self.main.table.setItem(
-                i,
-                1,
-                QtWidgets.QTableWidgetItem(
-                    str(self.varDict.get(list(self.varDict.keys())[i]))
-                ),
-            )
+            self.main.table.setItem(i, 0, QtWidgets.QTableWidgetItem(list(self.varDict.keys())[i]))
+            self.main.table.setItem(i,1,QtWidgets.QTableWidgetItem(str(self.varDict.get(list(self.varDict.keys())[i]))))
 
         self.main.switch_window.connect(self.show_var)
         self.main.switch_window2.connect(self.show_save)
@@ -852,6 +888,9 @@ class Controller:
         self.pos = self.main.firstPos
         self.varDict = self.main.varDict
 
+        self.varDependencies = self.main.varDependencies
+        self.varDec = self.main.varDec
+
         self.pinputWin.switch_window.connect(self.show_plot)
         self.pinputWin.show()
 
@@ -862,10 +901,12 @@ class Controller:
         self.pos = self.main.firstPos
         self.varDict = self.main.varDict
 
+        self.varDependencies = self.main.varDependencies
+        self.varDec = self.main.varDec
+
         try:
             self.pinputWin.error.setVisible(False)
             self.plotWin = PlotWindow(text)
-            self.pinputWin.close()
         except:
             self.pinputWin.error.setVisible(True)
 
@@ -876,6 +917,9 @@ class Controller:
         self.inputBoxText = self.main.scriptBox.toPlainText()
         self.pos = self.main.firstPos
         self.varDict = self.main.varDict
+
+        self.varDependencies = self.main.varDependencies
+        self.varDec = self.main.varDec
 
         self.window.switch_window.connect(self.show_main)
         self.window.show()
@@ -888,6 +932,9 @@ class Controller:
         self.pos = self.main.firstPos
         self.varDict = self.main.varDict
 
+        self.varDependencies = self.main.varDependencies
+        self.varDec = self.main.varDec
+
         self.saveWin.switch_window.connect(self.show_main)
         self.saveWin.show()
 
@@ -898,6 +945,9 @@ class Controller:
         self.inputBoxText = self.main.scriptBox.toPlainText()
         self.pos = self.main.firstPos
         self.varDict = self.main.varDict
+
+        self.varDependencies = self.main.varDependencies
+        self.varDec = self.main.varDec
 
         self.loadWin.switch_window.connect(self.show_main)
         self.loadWin.show()
