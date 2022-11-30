@@ -116,7 +116,7 @@ class Lexer:
 
                     elif character == "*":
                         # if token list is empty and,
-                        # the first character encountered is plus
+                        # the first character encountered is multiply
                         # then raise an exception
                         if not self.__tokens:
                             raise Exception("Invalid expression")
@@ -132,7 +132,7 @@ class Lexer:
 
                     elif character == "/":
                         # if token list is empty and,
-                        # the first character encountered is plus
+                        # the first character encountered is divide
                         # then raise an exception
                         if not self.__tokens:
                             raise Exception("Invalid expression")
@@ -153,7 +153,7 @@ class Lexer:
 
                     elif character == "^":
                         # if token list is empty and,
-                        # the first character encountered is plus
+                        # the first character encountered is caret
                         # then raise an exception
                         if not self.__tokens:
                             raise Exception("Invalid expression")
@@ -168,7 +168,7 @@ class Lexer:
 
                     elif character == "%":
                         # if token list is empty and,
-                        # the first character encountered is plus
+                        # the first character encountered is modulo
                         # then raise an exception
                         if not self.__tokens:
                             raise Exception("Invalid expression")
@@ -183,7 +183,7 @@ class Lexer:
 
                     elif character == "=":
                         # if token list is empty and,
-                        # the first character encountered is plus
+                        # the first character encountered is assign
                         # then raise an exception
                         if not self.__tokens:
                             raise Exception("Invalid expression")
@@ -201,7 +201,7 @@ class Lexer:
 
                     elif character == "<":
                         # if token list is empty and,
-                        # the first character encountered is plus
+                        # the first character encountered is less than
                         # then raise an exception
                         if not self.__tokens:
                             raise Exception("Invalid expression")
@@ -217,7 +217,7 @@ class Lexer:
 
                     elif character == ">":
                         # if token list is empty and,
-                        # the first character encountered is plus
+                        # the first character encountered is greater than
                         # then raise an exception
                         if not self.__tokens:
                             raise Exception("Invalid expression")
