@@ -60,9 +60,9 @@ class OperatorNode:
 
     def __init__(
         self,
-        left_node: OperandNode,
+        left_node: OperandNode or IdentifierNode or OperatorNode,
         operator: Token,
-        right_node: OperandNode,
+        right_node: OperandNode or IdentifierNode or OperatorNode,
     ):
         self.left_node = left_node
         self.operator = operator
@@ -113,9 +113,14 @@ class OperatorNode:
             return self.left_node.get_node_value() > self.right_node.get_node_value()
 
         elif self.operator.type == TokenType.ASSIGN:
-            SYMBOL_TABLE[str(self.left_node)] = self.right_node.get_node_value()
+            if self.left_node.token.type == TokenType.IDENTIFIER:
+                SYMBOL_TABLE[str(self.left_node)] = self.right_node.get_node_value()
+                return SYMBOL_TABLE[str(self.left_node)]
 
-            return SYMBOL_TABLE[str(self.left_node)]
+            raise Exception("Invalid expression")
+
+        elif self.operator.type == TokenType.EQ:
+            return self.left_node.get_node_value() == self.right_node.get_node_value()
 
     def __str__(self):
         return f"{self.left_node} {self.operator.type.name} {self.right_node}"

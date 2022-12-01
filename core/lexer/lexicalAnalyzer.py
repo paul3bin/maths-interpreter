@@ -26,6 +26,7 @@ OP_TOKEN_TYPE = (
     TokenType.ASSIGN,
     TokenType.LT,
     TokenType.GT,
+    TokenType.EQ,
 )
 OPERAND_TOKEN_TYPE = (TokenType.INTEGER, TokenType.FLOAT)
 
@@ -45,7 +46,7 @@ class Lexer:
         """
         Generates tokens and appends it to to tokens list
         """
-        # intializing the number string as an empty string
+        # intializing the number string and identifier string as an empty string
         number_string = ""
         identifier_string = ""
 
@@ -66,8 +67,8 @@ class Lexer:
                 if character.isdigit():
                     if identifier_string:
                         identifier_string += character
-                        continue
-                    number_string += character
+                    else:
+                        number_string += character
 
                 elif character == ".":
                     number_string += character
@@ -188,14 +189,16 @@ class Lexer:
                         if not self.__tokens:
                             raise Exception("Invalid expression")
 
-                        # if the last token in token list
-                        # is one of the TokenType is other than IDENTIFIER
-                        # then raise an exception
-                        elif (
-                            self.__tokens[-1].type in OP_TOKEN_TYPE
-                            or self.__tokens[-1].type in OPERAND_TOKEN_TYPE
-                        ):
-                            raise Exception("Invalid expression")
+                        # if the previous token is of TokenType ASSIGN,
+                        # then replace it with EQ token
+                        elif self.__tokens[-1].type == TokenType.ASSIGN:
+                            self.__tokens[-1] = Token(TokenType.EQ, "'=='")
+
+                        elif self.__tokens[-1].type == TokenType.EQ:
+                            raise Exception(
+                                "Invalid expression. No more than two (=) characters allowed"
+                            )
+
                         else:
                             self.__tokens.append(Token(TokenType.ASSIGN, "'='"))
 

@@ -28,6 +28,7 @@ class TokenType(Enum):
     ASSIGN = "ASSIGN"
     GT = "GREATER_THAN"
     LT = "LESS_THAN"
+    EQ = "EQUAL_TO"
     IDENTIFIER = "IDENTIFIER"
     END = "END"
 
