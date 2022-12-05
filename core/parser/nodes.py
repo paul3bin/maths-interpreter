@@ -53,7 +53,7 @@ class IdentifierNode:
 
 class OperatorNode:
     """
-    Class definition for Operator (+, -, *, /, ^, %, <, >, =) node
+    Class definition for Operator (+, -, *, /, ^, %, <, >, =, ==, !, !=) node
 
     The left node can either be an operator node or an operand node.
     """
@@ -121,6 +121,9 @@ class OperatorNode:
 
         elif self.operator.type == TokenType.EQ:
             return self.left_node.get_node_value() == self.right_node.get_node_value()
+
+        elif self.operator.type == TokenType.NEQ:
+            return self.left_node.get_node_value() != self.right_node.get_node_value()
 
     def __str__(self):
         return f"{self.left_node} {self.operator.type.name} {self.right_node}"

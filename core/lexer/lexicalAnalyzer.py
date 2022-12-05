@@ -13,8 +13,22 @@ from .token import Token, TokenType
 
 WHITESPACE = " \t"
 ALLOWED_IDENTIFIERS = "".join(tuple(ascii_lowercase)) + "".join(tuple(ascii_uppercase))
-ALLOWED_CHARACTERS = digits + "+-/*%()^=.<> \n\t" + ALLOWED_IDENTIFIERS
-ALLOWED_OP_CHARACTERS = ("+", "-", "/", "*", "%", "(", ")", "^", "%", "=", "<", ">")
+ALLOWED_CHARACTERS = digits + "+-/*%()^=.<>! \n\t" + ALLOWED_IDENTIFIERS
+ALLOWED_OP_CHARACTERS = (
+    "+",
+    "-",
+    "/",
+    "*",
+    "%",
+    "(",
+    ")",
+    "^",
+    "%",
+    "=",
+    "<",
+    ">",
+    "!",
+)
 OP_TOKEN_TYPE = (
     TokenType.MULTIPLY,
     TokenType.PLUS,
@@ -27,6 +41,8 @@ OP_TOKEN_TYPE = (
     TokenType.LT,
     TokenType.GT,
     TokenType.EQ,
+    TokenType.NOT,
+    TokenType.NEQ,
 )
 OPERAND_TOKEN_TYPE = (TokenType.INTEGER, TokenType.FLOAT)
 
@@ -194,6 +210,9 @@ class Lexer:
                         elif self.__tokens[-1].type == TokenType.ASSIGN:
                             self.__tokens[-1] = Token(TokenType.EQ, "'=='")
 
+                        elif self.__tokens[-1].type == TokenType.NOT:
+                            self.__tokens[-1] = Token(TokenType.NEQ, "'!='")
+
                         elif self.__tokens[-1].type == TokenType.EQ:
                             raise Exception(
                                 "Invalid expression. No more than two (=) characters allowed"
@@ -233,6 +252,9 @@ class Lexer:
 
                         else:
                             self.__tokens.append(Token(TokenType.GT, "'>'"))
+
+                    elif character == "!":
+                        self.__tokens.append(Token(TokenType.NOT, "!"))
 
             # if number string is not empty once loop ends,then add the integer token to the list
             if number_string:

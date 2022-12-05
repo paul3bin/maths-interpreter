@@ -99,6 +99,9 @@ class Parser:
         """
         result = self.factor()
 
+        if self.current_token.type == TokenType.NOT:
+            raise Exception("Invalid expression")
+
         while (
             self.current_token.type != TokenType.END
             and self.current_token
@@ -180,7 +183,7 @@ class Parser:
         while (
             self.current_token.type != TokenType.END
             and self.current_token
-            and self.current_token.type == TokenType.EQ
+            and self.current_token.type in (TokenType.EQ, TokenType.NEQ)
         ):
             operator = self.current_token
             self.next_token()

@@ -29,6 +29,8 @@ class TokenType(Enum):
     GT = "GREATER_THAN"
     LT = "LESS_THAN"
     EQ = "EQUAL_TO"
+    NOT = "NOT"
+    NEQ = "NOT_EQUAL"
     IDENTIFIER = "IDENTIFIER"
     END = "END"
 
