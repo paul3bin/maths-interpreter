@@ -29,6 +29,7 @@ History:     V1 - Basic layout for main window of GUI made
              V4 - Variable dependencies added
              V4.1 - Small bug fixes to the variable dependencies, removing dependencies when re-defined
              V4.2 - Made changes to PlotInputWindow, to include intervals
+             V4.3 - Variables output, Y-Axis now stationary, Stylesheet changed
 
 References: https://stackoverflow.com/questions/15263063/why-keypress-event-in-pyqt-does-not-work-for-key-enter
             https://stackoverflow.com/questions/72169262/pyqt5-access-mainwindow-from-another-window
@@ -52,17 +53,22 @@ import numpy as np
 import re  # maybe need to use for data validation/verification
 
 # QUESTIONS:
-# What happens if we have a variable called x?
+# What happens if we have a variable called x? (make variables case sensitive)
 # What happens if we have a variable called 'clear'?
 # Is the 'first' and 'last' value correct in plot?
 # ISSUE: if we do assignment and then random numbers still works e.g. "var1=2343sdfs", will save as "2343"
 
 # TO DO:
-# Look more in ReGex for data validation
-# Scroll/zoom-in for plot
+# Clean code
 # Add variable dependencies to scripts
 # Make it responsive/work on Windows
-# Clean code
+# Look more in ReGex for data validation
+# Scroll/zoom-in for plot
+
+# ROOT FINDINGS
+# Y-AXIS issues - Solved (I think)
+# Output value after variable assignment - Solved
+# Functions
 
 class PlotWindow:
      # https://mpl-interactions.readthedocs.io/en/stable/examples/zoom-factory.html
@@ -77,8 +83,6 @@ class PlotWindow:
 
         for i in range(len(x)):
             __tokens = Lexer(function[0]).get_tokens()  # get the tokens of inputted function
-
-            # Check if the form 5x is there - Additional feature
 
             string_build = ""  # builds string that's read into interpreter
             for z in range(len(__tokens)):  # for every token in string
@@ -103,7 +107,7 @@ class PlotWindow:
         # setting the axes at the centre
         fig = plt.figure()
         ax = fig.add_subplot(1, 1, 1)
-        ax.spines["left"].set_position("center")
+        ax.spines["left"].set_position("zero")
         ax.spines["bottom"].set_position("zero")
         ax.spines["right"].set_color("none")
         ax.spines["top"].set_color("none")
@@ -115,6 +119,8 @@ class PlotWindow:
         plt.title("Plot for " + function[0])
 
         plt.grid()
+
+        print(y)
 
         # show the plot
         plt.show()
@@ -218,9 +224,7 @@ class SaveWindow(QtWidgets.QWidget):
         self.error.setVisible(False)  # Initially set as False, unless error occurs
 
     def switch(self):
-        if (
-            re.search(r"^[a-zA-Z0-9]*$", self.name.toPlainText()) == None
-        ):  # if there is a space
+        if re.search(r"^[a-zA-Z0-9]*$", self.name.toPlainText()) == None:  # if there is a space
             self.error.setVisible(True)
         else:
             self.switch_window.emit(self.name.toPlainText() + ".txt")
@@ -425,9 +429,7 @@ class MainWindow(QtWidgets.QWidget):
         self.table.setColumnWidth(1, 153)
         self.table.resize(337, 447)
         self.table.move(887, 70)
-        self.table.setEditTriggers(
-            QtWidgets.QTableWidget.NoEditTriggers
-        )  # user can't edit variable table
+        self.table.setEditTriggers(QtWidgets.QTableWidget.NoEditTriggers)  # user can't edit variable table
 
         # Buttons
         self.runButton = QtWidgets.QPushButton(self)
@@ -614,21 +616,15 @@ class MainWindow(QtWidgets.QWidget):
 
     def run_script(self):  # For running the main input script
         cursor = self.scriptBox.textCursor()  # Cursor of the input box
-        cursor2 = QtGui.QTextCursor(
-            self.outputBox.document()
-        )  # Cursor of the output box
+        cursor2 = QtGui.QTextCursor(self.outputBox.document())  # Cursor of the output box
 
         if cursor.hasSelection():  # If text is highlighted
             # Output highlighted text on the command line
-            selected = self.scriptBox.toPlainText()[
-                cursor.selectionStart() : cursor.selectionEnd()
-            ].strip()
+            selected = self.scriptBox.toPlainText()[cursor.selectionStart() : cursor.selectionEnd()].strip()
             script_type = "Running partial script...\n"
 
         else:
-            selected = (
-                self.scriptBox.toPlainText().strip()
-            )  # Output whole script on command line
+            selected = self.scriptBox.toPlainText().strip()  # Output whole script on command line
             script_type = "Running script...\n"
 
         cursor2.beginEditBlock()
@@ -636,36 +632,19 @@ class MainWindow(QtWidgets.QWidget):
         cursor2.insertText(script_type)  # Output that the whole script is running
 
         for line in selected.splitlines():
-            cursor2.movePosition(
-                QtGui.QTextCursor.End, QtGui.QTextCursor.MoveAnchor
-            )  # moves cursor to end
+            cursor2.movePosition(QtGui.QTextCursor.End, QtGui.QTextCursor.MoveAnchor)  # moves cursor to end
             cursor2.insertText(">> " + line + "\n")
             try:
                 __tokens = Lexer(line).get_tokens()
 
                 if len(__tokens) > 1:
-                    if (
-                        __tokens[0].type == TokenType.IDENTIFIER
-                        and __tokens[1].type == TokenType.ASSIGN
-                    ):
+                    if (__tokens[0].type == TokenType.IDENTIFIER and __tokens[1].type == TokenType.ASSIGN):
 
                         self.varDict[__tokens[0].value] = str(main_execute(line))
 
                         for i in range(len(self.varDict.keys())):
-                            self.table.setItem(
-                                i,
-                                0,
-                                QtWidgets.QTableWidgetItem(
-                                    list(self.varDict.keys())[i]
-                                ),
-                            )
-                            self.table.setItem(
-                                i,
-                                1,
-                                QtWidgets.QTableWidgetItem(
-                                    str(self.varDict.get(list(self.varDict.keys())[i]))
-                                ),
-                            )
+                            self.table.setItem(i,0,QtWidgets.QTableWidgetItem(list(self.varDict.keys())[i]))
+                            self.table.setItem(i,1,QtWidgets.QTableWidgetItem(str(self.varDict.get(list(self.varDict.keys())[i]))))
 
                     else:
                         cursor2.insertText(str(main_execute(line)) + "\n")
@@ -674,23 +653,15 @@ class MainWindow(QtWidgets.QWidget):
                     cursor2.insertText(str(main_execute(line)) + "\n")
 
             except:
-                cursor2.insertText(
-                    "ERROR: Issue at line "
-                    + str(selected.splitlines().index(line) + 1)
-                    + "\n"
-                )
+                cursor2.insertText("ERROR: Issue at line " + str(selected.splitlines().index(line) + 1) + "\n")
                 break
 
         cursor2.insertText(">> ")
-        self.firstPos = (
-            cursor2.position()
-        )  # records first position of cursor line (for string output)
+        self.firstPos = cursor2.position()  # records first position of cursor line (for string output)
         cursor2.endEditBlock()
 
         self.savedPlainText = self.outputBox.toPlainText()  # Save the plain text
-        self.savedHtmlText = (
-            self.outputBox.toHtml()
-        )  # Save the HTML (i.e. if text bolded, coloured etc)
+        self.savedHtmlText = self.outputBox.toHtml()  # Save the HTML (i.e. if text bolded, coloured etc)
 
     def variable(self):
         self.switch_window.emit()
@@ -748,6 +719,7 @@ class MainWindow(QtWidgets.QWidget):
                 else:
                     try:
                         execution = main_execute(line)
+                        cursor.insertText("\n" + str(execution))
 
                         __tokens = Lexer(line).get_tokens()
 
@@ -758,7 +730,6 @@ class MainWindow(QtWidgets.QWidget):
                                 if __tokens[0].value not in list(self.varDict.keys()):
                                     self.varDependencies[__tokens[0].value] = []
                                 else:  # need to execute for dependencies
-                                    print("Dependencies:")
                                     for i in self.varDependencies[__tokens[0].value]:
                                         self.varDict[i] = main_execute(self.varDec[i])
 
@@ -774,7 +745,6 @@ class MainWindow(QtWidgets.QWidget):
                                 # Save the line where variable is defined
                                 # Store variable dependencies
 
-                                print("---")
                                 for i in range(len(__tokens[2:])):
                                     # i+2 to not include the identifier at the start of assignment
 
@@ -782,33 +752,16 @@ class MainWindow(QtWidgets.QWidget):
                                         if __tokens[0].value not in self.varDependencies[__tokens[i+2].value]:  # if not already in list
                                             self.varDependencies[__tokens[i+2].value].append(__tokens[0].value)  # add to list for variables
 
-                                print(self.varDependencies)
-
                                 # Adding dictionary values to graphical table
                                 for i in range(len(self.varDict.keys())):
-                                    self.table.setItem(i,
-                                        0,
-                                        QtWidgets.QTableWidgetItem(
-                                            list(self.varDict.keys())[i]
-                                        ),
-                                    )
-                                    self.table.setItem(
-                                        i,
-                                        1,
-                                        QtWidgets.QTableWidgetItem(
-                                            str(
-                                                self.varDict.get(
-                                                    list(self.varDict.keys())[i]
-                                                )
-                                            )
-                                        ),
-                                    )
+                                    self.table.setItem(i,0,QtWidgets.QTableWidgetItem(list(self.varDict.keys())[i]))
+                                    self.table.setItem(i,1,QtWidgets.QTableWidgetItem(str(self.varDict.get(list(self.varDict.keys())[i]))))
 
-                            else:
-                                cursor.insertText("\n" + str(execution))
+                            #else:
+                                #cursor.insertText("\n" + str(execution))
 
-                        else:
-                            cursor.insertText("\n" + str(execution))
+                        #else:
+                            #cursor.insertText("\n" + str(execution))
 
                     except Exception as e:
                         cursor.insertText("\nERROR: " + str(e))
@@ -955,6 +908,7 @@ class Controller:
 
 def main():
     app = QtWidgets.QApplication(sys.argv)
+    app.setStyle('Fusion')
     controller = Controller()
     controller.show_main()
     sys.exit(app.exec_())
