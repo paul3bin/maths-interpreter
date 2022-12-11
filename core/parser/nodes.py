@@ -81,7 +81,7 @@ class OperatorNode:
                     self.left_node.get_node_value() + self.right_node.get_node_value()
                 )
 
-            return self.right_node.get_node_value()
+            return +self.right_node.get_node_value()
 
         elif self.operator.type == TokenType.MINUS:
             # checking for unary MINUS operator

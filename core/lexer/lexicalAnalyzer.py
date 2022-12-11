@@ -125,12 +125,18 @@ class Lexer:
                             )
                             number_string = ""
 
+                    # Checking if the current character is + operator,
+                    # and appending a token with token-type PLUS to the tokens list
                     if character == "+":
                         self.__tokens.append(Token(TokenType.PLUS, "'+'"))
 
+                    # Checking if the current character is - operator,
+                    # and appending a token with token-type MINUS to the tokens list
                     elif character == "-":
                         self.__tokens.append(Token(TokenType.MINUS, "'-'"))
 
+                    # Checking if the current character is * operator,
+                    # and appending a token with token-type MULTIPLY to the tokens list
                     elif character == "*":
                         # if token list is empty and,
                         # the first character encountered is multiply
@@ -147,6 +153,8 @@ class Lexer:
                         else:
                             self.__tokens.append(Token(TokenType.MULTIPLY, "'*'"))
 
+                    # Checking if the current character is / operator,
+                    # and appending a token with token-type DIVIDE to the tokens list
                     elif character == "/":
                         # if token list is empty and,
                         # the first character encountered is divide
@@ -162,12 +170,18 @@ class Lexer:
                         else:
                             self.__tokens.append(Token(TokenType.DIVIDE, "'/'"))
 
+                    # Checking if the current character is (,
+                    # and appending a token with token-type LEFT_PARENTHESIS to the tokens list
                     elif character == "(":
                         self.__tokens.append(Token(TokenType.LEFT_PARENTHESIS, "'('"))
 
+                    # Checking if the current character is ),
+                    # and appending a token with token-type RIGHT_PARENTHESIS to the tokens list
                     elif character == ")":
                         self.__tokens.append(Token(TokenType.RIGHT_PARENTHESIS, "')'"))
 
+                    # Checking if the current character is ^ operator,
+                    # and appending a token with token-type CARET to the tokens list
                     elif character == "^":
                         # if token list is empty and,
                         # the first character encountered is caret
@@ -183,6 +197,8 @@ class Lexer:
                         else:
                             self.__tokens.append(Token(TokenType.CARET, "'^'"))
 
+                    # Checking if the current character is % operator,
+                    # and appending a token with token-type MODULO to the tokens list
                     elif character == "%":
                         # if token list is empty and,
                         # the first character encountered is modulo
@@ -198,6 +214,8 @@ class Lexer:
                         else:
                             self.__tokens.append(Token(TokenType.MODULO, "'%'"))
 
+                    # Checking if the current character is = operator,
+                    # and appending a token with token-type ASSIGN to the tokens list
                     elif character == "=":
                         # if token list is empty and,
                         # the first character encountered is assign
@@ -210,9 +228,13 @@ class Lexer:
                         elif self.__tokens[-1].type == TokenType.ASSIGN:
                             self.__tokens[-1] = Token(TokenType.EQ, "'=='")
 
+                        # if the previous token is of TokenType ASSIGN,
+                        # then replace it with NEQ token
                         elif self.__tokens[-1].type == TokenType.NOT:
                             self.__tokens[-1] = Token(TokenType.NEQ, "'!='")
 
+                        # if the previous token is of TokenType EQ,
+                        # then raise exception
                         elif self.__tokens[-1].type == TokenType.EQ:
                             raise Exception(
                                 "Invalid expression. No more than two (=) characters allowed"
@@ -221,6 +243,8 @@ class Lexer:
                         else:
                             self.__tokens.append(Token(TokenType.ASSIGN, "'='"))
 
+                    # Checking if the current character is < operator,
+                    # and appending a token with token-type LT to the tokens list
                     elif character == "<":
                         # if token list is empty and,
                         # the first character encountered is less than
@@ -237,6 +261,8 @@ class Lexer:
                         else:
                             self.__tokens.append(Token(TokenType.LT, "'<'"))
 
+                    # Checking if the current character is > operator,
+                    # and appending a token with token-type GT to the tokens list
                     elif character == ">":
                         # if token list is empty and,
                         # the first character encountered is greater than
@@ -253,6 +279,8 @@ class Lexer:
                         else:
                             self.__tokens.append(Token(TokenType.GT, "'>'"))
 
+                    # Checking if the current character is ! operator,
+                    # and appending a token with token-type NOT to the tokens list
                     elif character == "!":
                         self.__tokens.append(Token(TokenType.NOT, "!"))
 

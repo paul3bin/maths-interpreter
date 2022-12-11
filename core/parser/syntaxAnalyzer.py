@@ -1,5 +1,5 @@
 """
-AUTHOR: Ebin, Aswin
+AUTHORS: Ebin, Aswin
 DESCRIPTION: The following class is used to create an Abstract Syntax Tree (AST). The operators with higher precedence
             are the located lower in the tree mean while, operators with lower precedence are located higher in the tree.
             
