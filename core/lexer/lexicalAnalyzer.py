@@ -11,9 +11,8 @@ from string import ascii_lowercase, ascii_uppercase, digits
 
 from .token import Token, TokenType
 
-WHITESPACE = " \t"
+WHITESPACE = " \n\t"
 ALLOWED_IDENTIFIERS = "".join(tuple(ascii_lowercase)) + "".join(tuple(ascii_uppercase))
-ALLOWED_CHARACTERS = digits + "+-/*%()^=.<>! \n\t" + ALLOWED_IDENTIFIERS
 ALLOWED_OP_CHARACTERS = (
     "+",
     "-",
@@ -29,6 +28,8 @@ ALLOWED_OP_CHARACTERS = (
     ">",
     "!",
 )
+ALLOWED_CHARACTERS = digits + "".join(ALLOWED_OP_CHARACTERS) + ALLOWED_IDENTIFIERS
+
 OP_TOKEN_TYPE = (
     TokenType.MULTIPLY,
     TokenType.PLUS,
