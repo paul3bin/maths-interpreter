@@ -16,7 +16,7 @@ Description: The graphical user interface for the maths interpreter software. Th
              extra windows for opening a file, saving a file, and for writing in the f(x) function before displaying the
              Matplotlib plot.
 
-Version:     V4.2
+Version:     V4.4
 
 History:     V1 - Basic layout for main window of GUI made
              V1.1 - Basic outline for variable assignment window made
@@ -30,6 +30,7 @@ History:     V1 - Basic layout for main window of GUI made
              V4.1 - Small bug fixes to the variable dependencies, removing dependencies when re-defined
              V4.2 - Made changes to PlotInputWindow, to include intervals
              V4.3 - Variables output, Y-Axis now stationary, Stylesheet changed
+             V4.4 - Updated values to account for new Stylesheet used
 
 References: https://stackoverflow.com/questions/15263063/why-keypress-event-in-pyqt-does-not-work-for-key-enter
             https://stackoverflow.com/questions/72169262/pyqt5-access-mainwindow-from-another-window
@@ -61,14 +62,18 @@ import re  # maybe need to use for data validation/verification
 # TO DO:
 # Clean code
 # Add variable dependencies to scripts
-# Make it responsive/work on Windows
-# Look more in ReGex for data validation
 # Scroll/zoom-in for plot
+# Look more in ReGex for data validation
+
+# Make it responsive/work on Windows - THINK IVE DONE NEED TO CHECK WITH CHRISTOPHER AND EBIN
 
 # ROOT FINDINGS
-# Y-AXIS issues - Solved (I think)
-# Output value after variable assignment - Solved
 # Functions
+# https://python.plainenglish.io/lets-build-an-interpreter-in-python-from-scratch-833e9929bbb8
+# https://www.youtube.com/watch?v=S5XBTKWQNh0&ab_channel=JamesHobson
+# https://www.hpcf.upr.edu/~humberto/courses/book/adding-functions.html
+# https://chelseatroy.com/2021/05/15/implementing-function-declaration-and-invocation-in-a-programming-language/
+# https://www.codeproject.com/Articles/345888/How-to-Write-a-Simple-Interpreter-in-JavaScript
 
 class PlotWindow:
      # https://mpl-interactions.readthedocs.io/en/stable/examples/zoom-factory.html
@@ -212,7 +217,7 @@ class SaveWindow(QtWidgets.QWidget):
         b1 = QtWidgets.QPushButton(self)
         b1.setText("Submit")
         b1.clicked.connect(self.switch)
-        b1.move(125, 70)
+        b1.move(125, 80)
 
         self.error = QtWidgets.QLabel("Red", self)
         self.error.setStyleSheet("color:tomato;")
@@ -220,7 +225,7 @@ class SaveWindow(QtWidgets.QWidget):
         font = self.error.font()
         font.setPointSize(14)
         self.error.setFont(font)
-        self.error.move(89, 102)
+        self.error.move(89, 108)
         self.error.setVisible(False)  # Initially set as False, unless error occurs
 
     def switch(self):
@@ -255,7 +260,7 @@ class LoadWindow(QtWidgets.QWidget):
         b1 = QtWidgets.QPushButton(self)
         b1.setText("Submit")
         b1.clicked.connect(self.select)
-        b1.move(125, 70)
+        b1.move(125, 80)
 
         self.error = QtWidgets.QLabel("Red", self)
         self.error.setStyleSheet("color:tomato;")
@@ -263,7 +268,7 @@ class LoadWindow(QtWidgets.QWidget):
         font = self.error.font()
         font.setPointSize(14)
         self.error.setFont(font)
-        self.error.move(89, 102)  # 36, 32
+        self.error.move(89, 108)  # 36, 32
         self.error.setVisible(False)  # Initially set as False, unless error occurs
 
     def select(self):
@@ -356,13 +361,18 @@ class MainWindow(QtWidgets.QWidget):
         self.linePos = -1  # Should be -1 (unless loading after sub-window - need to do more)
 
         # Name at the top of application
-        name = QtWidgets.QLabel(self)
-        name.setText("<b>MathChamp</b>")
-        font = name.font()
-        font.setPointSize(40)
-        name.setFont(font)
-        name.resize(275, 60)
-        name.move(90, 0)
+        #name = QtWidgets.QLabel(self)
+        #name.setText("<b>MathChamp</b>")
+        #font = name.font()
+        #font.setPointSize(40)
+        #name.setFont(font)
+        #name.resize(275, 60)
+        #name.move(90, 0)
+
+        name = QLabel(self)
+        pixmap = QPixmap("./ui/mctext.jpg")
+        name.setPixmap(pixmap.scaled(300, 300, aspectRatioMode=QtCore.Qt.KeepAspectRatio))
+        name.move(80, 0)
 
         # Label at the top of application
         label = QLabel(self)
@@ -373,7 +383,7 @@ class MainWindow(QtWidgets.QWidget):
 
         # Scripting box
         self.scriptBox = QtWidgets.QTextEdit(self)
-        self.scriptBox.resize(851, 448)
+        self.scriptBox.resize(841, 448)
         self.scriptBox.move(25, 70)
         self.scriptBox.setAlignment(Qt.AlignTop)  # Alignment of text
         self.scriptBox.installEventFilter(self)  # Allows event detection
@@ -385,7 +395,7 @@ class MainWindow(QtWidgets.QWidget):
         # Output
         self.outputBox = QtWidgets.QTextEdit(self)
         self.outputBox.resize(990, 146)
-        self.outputBox.move(25, 527)
+        self.outputBox.move(25, 529)
         self.outputBox.setAlignment(Qt.AlignTop)  # Alignment of text
         self.outputBox.installEventFilter(self)  # Allows event detection
 
@@ -427,8 +437,8 @@ class MainWindow(QtWidgets.QWidget):
         self.table.setHorizontalHeaderLabels(["Variable name", "Value"])
         self.table.setColumnWidth(0, 153)  # indexing table at 0
         self.table.setColumnWidth(1, 153)
-        self.table.resize(337, 447)
-        self.table.move(887, 70)
+        self.table.resize(347, 447)
+        self.table.move(877, 70)
         self.table.setEditTriggers(QtWidgets.QTableWidget.NoEditTriggers)  # user can't edit variable table
 
         # Buttons
@@ -436,93 +446,86 @@ class MainWindow(QtWidgets.QWidget):
         self.runButton.setText("RUN")
         self.runButton.setIcon(QIcon("./ui/start.jpg"))
         self.runButton.clicked.connect(self.run_script)  # runs text in script window
-        self.runButton.resize(70, 75)
-        self.runButton.move(1020, 522)
-
-        self.stopButton = QtWidgets.QPushButton(self)
-        self.stopButton.setText("STOP")
-        self.stopButton.setIcon(QIcon("./ui/stop.jpg"))
-        # self.stopButton.clicked.connect(clicked)  # connected to a function
-        self.stopButton.resize(70, 75)
-        self.stopButton.move(1089, 522)
+        self.runButton.resize(60, 65)
+        self.runButton.move(1027, 528)
 
         self.plotButton = QtWidgets.QPushButton(self)
         self.plotButton.setText("f(x)")
         self.plotButton.clicked.connect(self.plot)  # connected to a function
-        self.plotButton.resize(70, 75)
-        self.plotButton.move(1159, 522)
+        self.plotButton.resize(60, 65)
+        self.plotButton.move(1164, 528)
 
         self.varButton = QtWidgets.QPushButton(self)
         self.varButton.setText("Create variable")
         self.varButton.clicked.connect(self.variable)
-        self.varButton.resize(210, 31)
-        self.varButton.move(1020, 592)
+        self.varButton.resize(197, 21)
+        self.varButton.move(1027, 602)
 
         self.sinButton = QtWidgets.QPushButton(self)
         self.sinButton.setText("sin")
         self.sinButton.clicked.connect(self.sin)  # connected to a function
-        self.sinButton.resize(50, 31)
-        self.sinButton.move(1020, 619)
+        self.sinButton.resize(41, 21)
+        self.sinButton.move(1027, 632)
 
         self.logxButton = QtWidgets.QPushButton(self)
         self.logxButton.setText("logx")
         self.logxButton.clicked.connect(self.logx)  # connected to a function
-        self.logxButton.resize(50, 31)
-        self.logxButton.move(1020, 646)
+        self.logxButton.resize(41, 21)
+        self.logxButton.move(1027, 652)
 
         self.cosButton = QtWidgets.QPushButton(self)
         self.cosButton.setText("cos")
         self.cosButton.clicked.connect(self.cos)  # connected to a function
-        self.cosButton.resize(50, 31)
-        self.cosButton.move(1060, 619)
+        self.cosButton.resize(40, 21)
+        self.cosButton.move(1067, 632)
 
         self.tanButton = QtWidgets.QPushButton(self)
         self.tanButton.setText("tan")
         self.tanButton.clicked.connect(self.tan)  # connected to a function
-        self.tanButton.resize(50, 31)
-        self.tanButton.move(1100, 619)
+        self.tanButton.resize(40, 21)
+        self.tanButton.move(1106, 632)
 
         self.sqrtButton = QtWidgets.QPushButton(self)
         self.sqrtButton.setText("sqrt")
         self.sqrtButton.clicked.connect(self.sqrt)  # connected to a function
-        self.sqrtButton.resize(50, 31)
-        self.sqrtButton.move(1140, 619)
+        self.sqrtButton.resize(40, 21)
+        self.sqrtButton.move(1145, 632)
 
         self.lnButton = QtWidgets.QPushButton(self)
         self.lnButton.setText("ln")
         self.lnButton.clicked.connect(self.ln)  # connected to a function
-        self.lnButton.resize(50, 31)
-        self.lnButton.move(1180, 619)
+        self.lnButton.resize(40, 21)
+        self.lnButton.move(1184, 632)
 
         self.log10Button = QtWidgets.QPushButton(self)
         self.log10Button.setText("log10")
         self.log10Button.clicked.connect(self.log10)  # connected to a function
-        self.log10Button.resize(50, 31)
-        self.log10Button.move(1060, 646)
+        self.log10Button.resize(40, 21)
+        self.log10Button.move(1067, 652)
 
         self.piButton = QtWidgets.QPushButton(self)
         self.piButton.setText("π")
         self.piButton.clicked.connect(self.pi)  # connected to a function
-        self.piButton.resize(50, 31)
-        self.piButton.move(1100, 646)  # 1100 646
+        self.piButton.resize(40, 21)
+        self.piButton.move(1106, 652)  # 1100 646
 
         self.expButton = QtWidgets.QPushButton(self)
         self.expButton.setText("e")
         self.expButton.clicked.connect(self.exponent)  # connected to a function
-        self.expButton.resize(50, 31)
-        self.expButton.move(1140, 646)  # 1140 646
+        self.expButton.resize(40, 21)
+        self.expButton.move(1145, 652)  # 1140 646
 
         self.loadButton = QtWidgets.QPushButton(self)
         self.loadButton.setText("Load")
         self.loadButton.clicked.connect(self.load)  # connected to a function
-        self.loadButton.resize(60, 31)
-        self.loadButton.move(820, 40)  # 1180
+        self.loadButton.resize(45, 21)
+        self.loadButton.move(820, 45)  # 1180
 
         self.saveButton = QtWidgets.QPushButton(self)
         self.saveButton.setText("Save")
         self.saveButton.clicked.connect(self.save)  # connected to a function
-        self.saveButton.resize(60, 31)
-        self.saveButton.move(770, 40)  # 820
+        self.saveButton.resize(45, 21)
+        self.saveButton.move(770, 45)  # 820
 
     def sin(self):
         cursor = QtGui.QTextCursor(self.outputBox.document())
