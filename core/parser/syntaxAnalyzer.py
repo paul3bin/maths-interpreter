@@ -1,5 +1,5 @@
 """
-AUTHOR: Ebin, Aswin
+AUTHORS: Ebin, Aswin
 DESCRIPTION: The following class is used to create an Abstract Syntax Tree (AST). The operators with higher precedence
             are the located lower in the tree mean while, operators with lower precedence are located higher in the tree.
             
@@ -23,6 +23,7 @@ from .nodes import IdentifierNode, OperandNode, OperatorNode
 """
 BNF :-
     <assignment> -> <variable> = <expression>
+    <equality-expression> -> <relational> [(== | !=) <equality-expression>]*
     <relational> -> <expression> [(< | >)] <expression>
     <expression> -> <term> [(+ | -) <term>]*
     <term> -> <term> [(* | / | %) <power>]*
@@ -98,6 +99,9 @@ class Parser:
         """
         result = self.factor()
 
+        if self.current_token.type == TokenType.NOT:
+            raise Exception("Invalid expression")
+
         while (
             self.current_token.type != TokenType.END
             and self.current_token
@@ -153,7 +157,7 @@ class Parser:
 
         return result
 
-    def comparison(self):
+    def relational(self):
         """
         BNF for relational operators
         <relational> -> <expression> [(< | >)] <expression>
@@ -170,12 +174,29 @@ class Parser:
 
         return result
 
+    def equality(self):
+        """
+        BNF for relational operators
+        <equality-expression> -> <relational> [(== | !=) <equality-expression>]*
+        """
+        result = self.relational()
+        while (
+            self.current_token.type != TokenType.END
+            and self.current_token
+            and self.current_token.type in (TokenType.EQ, TokenType.NEQ)
+        ):
+            operator = self.current_token
+            self.next_token()
+            result = OperatorNode(result, operator, self.relational())
+
+        return result
+
     def assignment(self):
         """
         BNF for assignment
         <assignment> -> <variable> = <expression>
         """
-        result = self.comparison()
+        result = self.equality()
         while (
             self.current_token.type != TokenType.END
             and self.current_token
@@ -183,7 +204,7 @@ class Parser:
         ):
             operator = self.current_token
             self.next_token()
-            result = OperatorNode(result, operator, self.comparison())
+            result = OperatorNode(result, operator, self.equality())
 
         return result
 

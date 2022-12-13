@@ -11,10 +11,25 @@ from string import ascii_lowercase, ascii_uppercase, digits
 
 from .token import Token, TokenType
 
-WHITESPACE = " \t"
+WHITESPACE = " \n\t"
 ALLOWED_IDENTIFIERS = "".join(tuple(ascii_lowercase)) + "".join(tuple(ascii_uppercase))
-ALLOWED_CHARACTERS = digits + "+-/*%()^=.<> \n\t" + ALLOWED_IDENTIFIERS
-ALLOWED_OP_CHARACTERS = ("+", "-", "/", "*", "%", "(", ")", "^", "%", "=", "<", ">")
+ALLOWED_OP_CHARACTERS = (
+    "+",
+    "-",
+    "/",
+    "*",
+    "%",
+    "(",
+    ")",
+    "^",
+    "%",
+    "=",
+    "<",
+    ">",
+    "!",
+)
+ALLOWED_CHARACTERS = digits + "".join(ALLOWED_OP_CHARACTERS) + ALLOWED_IDENTIFIERS
+
 OP_TOKEN_TYPE = (
     TokenType.MULTIPLY,
     TokenType.PLUS,
@@ -26,6 +41,9 @@ OP_TOKEN_TYPE = (
     TokenType.ASSIGN,
     TokenType.LT,
     TokenType.GT,
+    TokenType.EQ,
+    TokenType.NOT,
+    TokenType.NEQ,
 )
 OPERAND_TOKEN_TYPE = (TokenType.INTEGER, TokenType.FLOAT)
 
@@ -45,7 +63,7 @@ class Lexer:
         """
         Generates tokens and appends it to to tokens list
         """
-        # intializing the number string as an empty string
+        # intializing the number string and identifier string as an empty string
         number_string = ""
         identifier_string = ""
 
@@ -66,8 +84,8 @@ class Lexer:
                 if character.isdigit():
                     if identifier_string:
                         identifier_string += character
-                        continue
-                    number_string += character
+                    else:
+                        number_string += character
 
                 elif character == ".":
                     number_string += character
@@ -108,15 +126,21 @@ class Lexer:
                             )
                             number_string = ""
 
+                    # Checking if the current character is + operator,
+                    # and appending a token with token-type PLUS to the tokens list
                     if character == "+":
                         self.__tokens.append(Token(TokenType.PLUS, "'+'"))
 
+                    # Checking if the current character is - operator,
+                    # and appending a token with token-type MINUS to the tokens list
                     elif character == "-":
                         self.__tokens.append(Token(TokenType.MINUS, "'-'"))
 
+                    # Checking if the current character is * operator,
+                    # and appending a token with token-type MULTIPLY to the tokens list
                     elif character == "*":
                         # if token list is empty and,
-                        # the first character encountered is plus
+                        # the first character encountered is multiply
                         # then raise an exception
                         if not self.__tokens:
                             raise Exception("Invalid expression")
@@ -130,9 +154,11 @@ class Lexer:
                         else:
                             self.__tokens.append(Token(TokenType.MULTIPLY, "'*'"))
 
+                    # Checking if the current character is / operator,
+                    # and appending a token with token-type DIVIDE to the tokens list
                     elif character == "/":
                         # if token list is empty and,
-                        # the first character encountered is plus
+                        # the first character encountered is divide
                         # then raise an exception
                         if not self.__tokens:
                             raise Exception("Invalid expression")
@@ -145,15 +171,21 @@ class Lexer:
                         else:
                             self.__tokens.append(Token(TokenType.DIVIDE, "'/'"))
 
+                    # Checking if the current character is (,
+                    # and appending a token with token-type LEFT_PARENTHESIS to the tokens list
                     elif character == "(":
                         self.__tokens.append(Token(TokenType.LEFT_PARENTHESIS, "'('"))
 
+                    # Checking if the current character is ),
+                    # and appending a token with token-type RIGHT_PARENTHESIS to the tokens list
                     elif character == ")":
                         self.__tokens.append(Token(TokenType.RIGHT_PARENTHESIS, "')'"))
 
+                    # Checking if the current character is ^ operator,
+                    # and appending a token with token-type CARET to the tokens list
                     elif character == "^":
                         # if token list is empty and,
-                        # the first character encountered is plus
+                        # the first character encountered is caret
                         # then raise an exception
                         if not self.__tokens:
                             raise Exception("Invalid expression")
@@ -166,9 +198,11 @@ class Lexer:
                         else:
                             self.__tokens.append(Token(TokenType.CARET, "'^'"))
 
+                    # Checking if the current character is % operator,
+                    # and appending a token with token-type MODULO to the tokens list
                     elif character == "%":
                         # if token list is empty and,
-                        # the first character encountered is plus
+                        # the first character encountered is modulo
                         # then raise an exception
                         if not self.__tokens:
                             raise Exception("Invalid expression")
@@ -181,27 +215,40 @@ class Lexer:
                         else:
                             self.__tokens.append(Token(TokenType.MODULO, "'%'"))
 
+                    # Checking if the current character is = operator,
+                    # and appending a token with token-type ASSIGN to the tokens list
                     elif character == "=":
                         # if token list is empty and,
-                        # the first character encountered is plus
+                        # the first character encountered is assign
                         # then raise an exception
                         if not self.__tokens:
                             raise Exception("Invalid expression")
 
-                        # if the last token in token list
-                        # is one of the TokenType is other than IDENTIFIER
-                        # then raise an exception
-                        elif (
-                            self.__tokens[-1].type in OP_TOKEN_TYPE
-                            or self.__tokens[-1].type in OPERAND_TOKEN_TYPE
-                        ):
-                            raise Exception("Invalid expression")
+                        # if the previous token is of TokenType ASSIGN,
+                        # then replace it with EQ token
+                        elif self.__tokens[-1].type == TokenType.ASSIGN:
+                            self.__tokens[-1] = Token(TokenType.EQ, "'=='")
+
+                        # if the previous token is of TokenType ASSIGN,
+                        # then replace it with NEQ token
+                        elif self.__tokens[-1].type == TokenType.NOT:
+                            self.__tokens[-1] = Token(TokenType.NEQ, "'!='")
+
+                        # if the previous token is of TokenType EQ,
+                        # then raise exception
+                        elif self.__tokens[-1].type == TokenType.EQ:
+                            raise Exception(
+                                "Invalid expression. No more than two (=) characters allowed"
+                            )
+
                         else:
                             self.__tokens.append(Token(TokenType.ASSIGN, "'='"))
 
+                    # Checking if the current character is < operator,
+                    # and appending a token with token-type LT to the tokens list
                     elif character == "<":
                         # if token list is empty and,
-                        # the first character encountered is plus
+                        # the first character encountered is less than
                         # then raise an exception
                         if not self.__tokens:
                             raise Exception("Invalid expression")
@@ -215,9 +262,11 @@ class Lexer:
                         else:
                             self.__tokens.append(Token(TokenType.LT, "'<'"))
 
+                    # Checking if the current character is > operator,
+                    # and appending a token with token-type GT to the tokens list
                     elif character == ">":
                         # if token list is empty and,
-                        # the first character encountered is plus
+                        # the first character encountered is greater than
                         # then raise an exception
                         if not self.__tokens:
                             raise Exception("Invalid expression")
@@ -230,6 +279,11 @@ class Lexer:
 
                         else:
                             self.__tokens.append(Token(TokenType.GT, "'>'"))
+
+                    # Checking if the current character is ! operator,
+                    # and appending a token with token-type NOT to the tokens list
+                    elif character == "!":
+                        self.__tokens.append(Token(TokenType.NOT, "!"))
 
             # if number string is not empty once loop ends,then add the integer token to the list
             if number_string:
