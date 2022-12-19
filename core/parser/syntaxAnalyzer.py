@@ -72,6 +72,21 @@ class Parser:
         if self.current_token.type == TokenType.END:
             return
 
+        # if the expression starts with one of the following tokens,
+        # then raise an exception
+        if self.current_token.type in (
+            TokenType.MULTIPLY,
+            TokenType.MODULO,
+            TokenType.DIVIDE,
+            TokenType.CARET,
+            TokenType.ASSIGN,
+            TokenType.GT,
+            TokenType.LT,
+            TokenType.NEQ,
+            TokenType.EQ,
+        ):
+            raise Exception("Invalid expression.")
+
         # set the left node as NULL/NONE is the current node encountered is a unary operator.
         elif self.current_token.type in (TokenType.PLUS, TokenType.MINUS):
             self.next_token()

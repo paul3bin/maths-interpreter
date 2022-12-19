@@ -21,4 +21,7 @@ class Interpreter:
         """
         returns the value of the root node which runs recursively to obtain the result of the expression.
         """
-        return self.__root_node.get_node_value()
+        if self.__root_node:
+            return self.__root_node.get_node_value()
+
+        return ""
