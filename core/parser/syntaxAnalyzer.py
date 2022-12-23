@@ -16,6 +16,7 @@ REFERENCES: https://pages.cs.wisc.edu/~fischer/cs536.s06/course.hold/html/NOTES/
 """
 
 
+from core.lexer.lexicalAnalyzer import Lexer
 from core.lexer.token import Token, TokenType
 
 from .nodes import IdentifierNode, OperandNode, OperatorNode
@@ -34,8 +35,8 @@ BNF :-
 
 
 class Parser:
-    def __init__(self, tokens: list):
-        self.__tokens = tokens
+    def __init__(self, input_string: str):
+        self.__tokens = Lexer(input_string).get_tokens()
         self.current_token: Token = None
         self.position = 0
         self.parenthesis_stack = []

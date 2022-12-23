@@ -61,9 +61,9 @@ class Lexer:
                 return
             self.__tokens.append(Token(ALLOWED_OPERATORS[token_char], token_char))
 
-    def generate_tokens(self):
+    def generate_tokens(self) -> None:
         """
-        Generates tokens and appends it to to tokens list
+        Identifies each token from the input string and appends it to the tokens list
         """
         # intializing the number string and identifier string as an empty string
         number_string = ""
