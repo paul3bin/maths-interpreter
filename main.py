@@ -1,5 +1,5 @@
 """
-Author(s):   Max James, Ebin Paul, Christopher Gavey, Aswin, Soniya
+Author:      Max James
 
 Date:        26/11/22
 
@@ -58,16 +58,16 @@ import re  # maybe need to use for data validation/verification
 # What happens if we have a variable called 'clear'?
 # Is the 'first' and 'last' value correct in plot?
 # ISSUE: if we do assignment and then random numbers still works e.g. "var1=2343sdfs", will save as "2343"
+# Add variable dependencies to scripts
+
+# What happens when we reference a variable that has references
 
 # TO DO:
 # Clean code
-# Add variable dependencies to scripts
-# Scroll/zoom-in for plot
 # Look more in ReGex for data validation
 
-# Make it responsive/work on Windows - THINK IVE DONE NEED TO CHECK WITH CHRISTOPHER AND EBIN
-
 # ROOT FINDINGS
+# Newton-Raphson Method would be the best
 # Functions
 # https://python.plainenglish.io/lets-build-an-interpreter-in-python-from-scratch-833e9929bbb8
 # https://www.youtube.com/watch?v=S5XBTKWQNh0&ab_channel=JamesHobson
@@ -78,6 +78,14 @@ import re  # maybe need to use for data validation/verification
 class PlotWindow:
      # https://mpl-interactions.readthedocs.io/en/stable/examples/zoom-factory.html
 
+    def find_string(self, list, start):
+
+        indices = [i for i, x in enumerate(list) if x == "x"]
+        for i in range(len(indices)):
+            list[indices[i]] = start
+
+        return ''.join(str(token).replace('\'', '') for token in list)
+
     def __init__(self, function):
 
         function = function.split("|")
@@ -86,9 +94,9 @@ class PlotWindow:
         x = np.linspace(int(function[1]), int(function[2]), 100)  # 100 of these values
         y = np.zeros(100)  # y list of the same length
 
-        for i in range(len(x)):
-            __tokens = Lexer(function[0]).get_tokens()  # get the tokens of inputted function
+        __tokens = Lexer(function[0]).get_tokens()  # get the tokens of inputted function
 
+        for i in range(len(x)):
             string_build = ""  # builds string that's read into interpreter
             for z in range(len(__tokens)):  # for every token in string
 
@@ -124,8 +132,6 @@ class PlotWindow:
         plt.title("Plot for " + function[0])
 
         plt.grid()
-
-        print(y)
 
         # show the plot
         plt.show()
@@ -446,14 +452,14 @@ class MainWindow(QtWidgets.QWidget):
         self.runButton.setText("RUN")
         self.runButton.setIcon(QIcon("./ui/start.jpg"))
         self.runButton.clicked.connect(self.run_script)  # runs text in script window
-        self.runButton.resize(60, 65)
+        self.runButton.resize(95, 65)
         self.runButton.move(1027, 528)
 
         self.plotButton = QtWidgets.QPushButton(self)
         self.plotButton.setText("f(x)")
         self.plotButton.clicked.connect(self.plot)  # connected to a function
-        self.plotButton.resize(60, 65)
-        self.plotButton.move(1164, 528)
+        self.plotButton.resize(95, 65)
+        self.plotButton.move(1129, 528)
 
         self.varButton = QtWidgets.QPushButton(self)
         self.varButton.setText("Create variable")
@@ -468,7 +474,7 @@ class MainWindow(QtWidgets.QWidget):
         self.sinButton.move(1027, 632)
 
         self.logxButton = QtWidgets.QPushButton(self)
-        self.logxButton.setText("logx")
+        self.logxButton.setText("lgx")
         self.logxButton.clicked.connect(self.logx)  # connected to a function
         self.logxButton.resize(41, 21)
         self.logxButton.move(1027, 652)
@@ -486,19 +492,19 @@ class MainWindow(QtWidgets.QWidget):
         self.tanButton.move(1106, 632)
 
         self.sqrtButton = QtWidgets.QPushButton(self)
-        self.sqrtButton.setText("sqrt")
+        self.sqrtButton.setText("sqt")
         self.sqrtButton.clicked.connect(self.sqrt)  # connected to a function
         self.sqrtButton.resize(40, 21)
         self.sqrtButton.move(1145, 632)
 
         self.lnButton = QtWidgets.QPushButton(self)
-        self.lnButton.setText("ln")
+        self.lnButton.setText("lgn")
         self.lnButton.clicked.connect(self.ln)  # connected to a function
         self.lnButton.resize(40, 21)
         self.lnButton.move(1184, 632)
 
         self.log10Button = QtWidgets.QPushButton(self)
-        self.log10Button.setText("log10")
+        self.log10Button.setText("l10")
         self.log10Button.clicked.connect(self.log10)  # connected to a function
         self.log10Button.resize(40, 21)
         self.log10Button.move(1067, 652)
@@ -510,7 +516,7 @@ class MainWindow(QtWidgets.QWidget):
         self.piButton.move(1106, 652)  # 1100 646
 
         self.expButton = QtWidgets.QPushButton(self)
-        self.expButton.setText("e")
+        self.expButton.setText("exp")
         self.expButton.clicked.connect(self.exponent)  # connected to a function
         self.expButton.resize(40, 21)
         self.expButton.move(1145, 652)  # 1140 646
@@ -638,12 +644,36 @@ class MainWindow(QtWidgets.QWidget):
             cursor2.movePosition(QtGui.QTextCursor.End, QtGui.QTextCursor.MoveAnchor)  # moves cursor to end
             cursor2.insertText(">> " + line + "\n")
             try:
+                main_execute(line)
                 __tokens = Lexer(line).get_tokens()
 
                 if len(__tokens) > 1:
                     if (__tokens[0].type == TokenType.IDENTIFIER and __tokens[1].type == TokenType.ASSIGN):
 
+                        cursor2.insertText(str(main_execute(line)) + "\n")
+
+                        if __tokens[0].value not in list(self.varDict.keys()):
+                            self.varDependencies[__tokens[0].value] = []
+                        else:
+                            print(__tokens[0].value)
+                            for i in self.varDependencies[__tokens[0].value]:
+                                print(i)
+                                print(main_execute(self.varDec[i]))
+                                self.varDict[i] = main_execute(self.varDec[i])
+
                         self.varDict[__tokens[0].value] = str(main_execute(line))
+
+                        if __tokens[0].value in self.varDec.keys():
+                            for i in self.varDependencies:
+                                if __tokens[0].value in self.varDependencies[i]:
+                                    self.varDependencies[i].remove(__tokens[0].value)
+
+                        self.varDec[__tokens[0].value] = line  # stores the assignment line of variable
+
+                        for i in range(len(__tokens[2:])):
+                            if TokenType.IDENTIFIER == __tokens[i + 2].type:
+                                if __tokens[0].value not in self.varDependencies[__tokens[i+2].value]:
+                                    self.varDependencies[__tokens[i + 2].value].append(__tokens[0].value)
 
                         for i in range(len(self.varDict.keys())):
                             self.table.setItem(i,0,QtWidgets.QTableWidgetItem(list(self.varDict.keys())[i]))
