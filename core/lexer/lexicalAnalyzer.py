@@ -38,7 +38,9 @@ OTHER_TOKENS = {
     "END": TokenType.END,
 }
 
-ALLOWED_CHARACTERS = digits + "".join(ALLOWED_OPERATORS.keys()) + ALLOWED_IDENTIFIERS
+ALLOWED_CHARACTERS = (
+    digits + "".join(ALLOWED_OPERATORS.keys()) + ALLOWED_IDENTIFIERS + "."
+)
 
 
 class Lexer:
@@ -147,6 +149,7 @@ class Lexer:
                                 "Invalid expression. No more than two (=) characters allowed"
                             )
 
+                    # adding the appropriate token based on the current character.
                     self.add_token_to_list(character)
 
             # if number string is not empty once loop ends,then add the integer token to the list
