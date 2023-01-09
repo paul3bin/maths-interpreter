@@ -36,11 +36,14 @@ OTHER_TOKENS = {
     "INT": TokenType.INTEGER,
     "FLOAT": TokenType.FLOAT,
     "END": TokenType.END,
+    "FUNC": TokenType.FUNC,
 }
 
 ALLOWED_CHARACTERS = (
     digits + "".join(ALLOWED_OPERATORS.keys()) + ALLOWED_IDENTIFIERS + "."
 )
+
+ALLOWED_FUNCTION = ("sin", "cos", "tan", "fact")
 
 
 class Lexer:
@@ -105,6 +108,15 @@ class Lexer:
                     if identifier_string:
                         if number_string:
                             raise Exception("Invalid expression.")
+
+                        if character == "(":
+                            if identifier_string in ALLOWED_FUNCTION:
+                                self.add_token_to_list("FUNC", identifier_string)
+                                self.add_token_to_list(character)
+                                identifier_string = ""
+                                continue
+                            else:
+                                raise Exception("Function not defined.")
 
                         self.add_token_to_list("ID", identifier_string)
 

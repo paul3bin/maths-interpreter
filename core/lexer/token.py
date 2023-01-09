@@ -34,6 +34,7 @@ class TokenType(Enum):
     NEQ = "NOT_EQUAL"
     IDENTIFIER = "IDENTIFIER"
     END = "END"
+    FUNC = "FUNC"
 
 
 class Token:
@@ -47,7 +48,7 @@ class Token:
 
     # string representation of a token.
     def __str__(self):
-        return f"Token({self.type.name}: {self.value})"
+        return f"Token({self.type.name}: '{self.value}')"
 
     def __repr__(self):
         return self.__str__()

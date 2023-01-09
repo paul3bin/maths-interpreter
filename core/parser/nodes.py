@@ -51,6 +51,21 @@ class IdentifierNode:
         return self.__str__()
 
 
+class FunctionNode:
+    def __init__(self, token: Token, value):
+        self.token: Token = token
+        self.leaf_node = value
+
+    def get_node_value(self):
+        return f"{self.token.value}({self.leaf_node})"
+
+    def __str__(self):
+        return self.__value
+
+    def __repr__(self):
+        return self.__str__()
+
+
 class OperatorNode:
     """
     Class definition for Operator (+, -, *, /, ^, %, <, >, =, ==, !, !=) node
