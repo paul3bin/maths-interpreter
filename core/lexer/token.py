@@ -1,9 +1,10 @@
 """
-AUTHOR: Ebin Paul
+AUTHOR: Ebin, Aswin
 DESCRIPTION: The following classes are nodes of Abstract Syntax Tree (AST). Each class has a get_node_value method which returns,
             the value of that particular node
             
 REFERENCES: https://ruslanspivak.com/lsbasi-part1/
+            https://dev.to/j0nimost/implementing-a-math-interpreter-using-c-part2-lexer-4i81
 """
 
 
@@ -28,6 +29,9 @@ class TokenType(Enum):
     ASSIGN = "ASSIGN"
     GT = "GREATER_THAN"
     LT = "LESS_THAN"
+    EQ = "EQUAL_TO"
+    NOT = "NOT"
+    NEQ = "NOT_EQUAL"
     IDENTIFIER = "IDENTIFIER"
     END = "END"
     FUNCTION = "FUNCTION"  # New addition
