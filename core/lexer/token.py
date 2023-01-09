@@ -1,5 +1,5 @@
 """
-AUTHOR: Ebin Paul, Aswin
+AUTHOR: Ebin Paul, Aswin Sasi
 DESCRIPTION: The following classes are nodes of Abstract Syntax Tree (AST). Each class has a get_node_value method which returns,
             the value of that particular node
             
