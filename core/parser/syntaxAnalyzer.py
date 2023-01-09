@@ -1,10 +1,31 @@
+"""
+AUTHORS: Ebin Paul, Aswin Sasi
+DESCRIPTION: The following class is used to create an Abstract Syntax Tree (AST). The operators with higher precedence
+            are the located lower in the tree mean while, operators with lower precedence are located higher in the tree.
+            
+REFERENCES: https://pages.cs.wisc.edu/~fischer/cs536.s06/course.hold/html/NOTES/4.SYNTAX-DIRECTED-TRANSLATION.html#astVsParse
+            https://en.cppreference.com/w/cpp/language/operator_precedence
+            https://cs.wmich.edu/~gupta/teaching/cs4850/sumII06/The%20syntax%20of%20C%20in%20Backus-Naur%20form.htm
+            https://ruslanspivak.com/lsbasi-part3/
+            https://ruslanspivak.com/lsbasi-part4/
+            https://ruslanspivak.com/lsbasi-part5/
+            https://ruslanspivak.com/lsbasi-part7/
+            https://ruslanspivak.com/lsbasi-part8/
+            https://dev.to/j0nimost/making-a-math-interpreter-ast-4848
+            https://dev.to/j0nimost/making-a-math-interpreter-parser-52j8
+"""
+
+
+from core.lexer.lexicalAnalyzer import Lexer
 from core.lexer.token import Token, TokenType
 
-from .nodes import IdentifierNode, OperandNode, OperatorNode
+from .nodes import IdentifierNode, OperandNode, OperatorNode, FunctionNode
 
 """
 BNF :-
-
+    <assignment> -> <variable> = <expression>
+    <equality-expression> -> <relational> [(== | !=) <equality-expression>]*
+    <relational> -> <expression> [(< | >)] <expression>
     <expression> -> <term> [(+ | -) <term>]*
     <term> -> <term> [(* | / | %) <power>]*
     <power> -> <factor> ^ <power> | <factor>
@@ -14,8 +35,8 @@ BNF :-
 
 
 class Parser:
-    def __init__(self, tokens: list):
-        self.__tokens = tokens
+    def __init__(self, input_string: str):
+        self.__tokens = Lexer(input_string).get_tokens()
         self.current_token: Token = None
         self.position = 0
         self.parenthesis_stack = []
@@ -52,6 +73,21 @@ class Parser:
         if self.current_token.type == TokenType.END:
             return
 
+        # if the expression starts with one of the following tokens,
+        # then raise an exception
+        if self.current_token.type in (
+            TokenType.MULTIPLY,
+            TokenType.MODULO,
+            TokenType.DIVIDE,
+            TokenType.CARET,
+            TokenType.ASSIGN,
+            TokenType.GT,
+            TokenType.LT,
+            TokenType.NEQ,
+            TokenType.EQ,
+        ):
+            raise Exception("Invalid expression.")
+
         # set the left node as NULL/NONE is the current node encountered is a unary operator.
         elif self.current_token.type in (TokenType.PLUS, TokenType.MINUS):
             self.next_token()
@@ -78,6 +114,9 @@ class Parser:
         <power> -> <factor> ^ <power> | <factor>
         """
         result = self.factor()
+
+        if self.current_token.type == TokenType.NOT:
+            raise Exception("Invalid expression")
 
         while (
             self.current_token.type != TokenType.END
@@ -134,8 +173,11 @@ class Parser:
 
         return result
 
-    def comparison(self):
-
+    def relational(self):
+        """
+        BNF for relational operators
+        <relational> -> <expression> [(< | >)] <expression>
+        """
         result = self.expression()
         while (
             self.current_token.type != TokenType.END
@@ -148,9 +190,29 @@ class Parser:
 
         return result
 
-    def assignment(self):
+    def equality(self):
+        """
+        BNF for relational operators
+        <equality-expression> -> <relational> [(== | !=) <equality-expression>]*
+        """
+        result = self.relational()
+        while (
+            self.current_token.type != TokenType.END
+            and self.current_token
+            and self.current_token.type in (TokenType.EQ, TokenType.NEQ)
+        ):
+            operator = self.current_token
+            self.next_token()
+            result = OperatorNode(result, operator, self.relational())
 
-        result = self.comparison()
+        return result
+
+    def assignment(self):
+        """
+        BNF for assignment
+        <assignment> -> <variable> = <expression>
+        """
+        result = self.equality()
         while (
             self.current_token.type != TokenType.END
             and self.current_token
@@ -158,7 +220,23 @@ class Parser:
         ):
             operator = self.current_token
             self.next_token()
-            result = OperatorNode(result, operator, self.expression())
+            result = OperatorNode(result, operator, self.equality())
+
+        return result
+
+    def function_definition(self):
+        """
+        BNF for assignment
+        <assignment> -> <variable> = <expression>
+        """
+        while (
+            self.current_token.type != TokenType.END
+            and self.current_token
+            and self.current_token.type == TokenType.FUNC
+        ):
+            function = self.current_token
+            self.next_token()
+            result = FunctionNode(function, self.factor())
 
         return result
 
@@ -166,7 +244,11 @@ class Parser:
         """
         Parses the tokens list and returns an AST (Abstract Syntax Tree)
         """
-        result = self.assignment()
+
+        if self.__tokens[0].type == TokenType.FUNC:
+            result = self.function_definition()
+        else:
+            result = self.assignment()
 
         if self.parenthesis_stack:
             raise Exception("Missing parenthesis")
