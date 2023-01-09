@@ -7,6 +7,7 @@ from .parser.syntaxAnalyzer import Parser
 class Interpreter:
     def __init__(self, input_string):
         self.__tokens = Lexer(input_string).get_tokens()
+        print(self.__tokens)
         self.__root_node = Parser(self.__tokens).parse()
 
     def execute(self):

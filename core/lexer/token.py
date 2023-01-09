@@ -30,6 +30,7 @@ class TokenType(Enum):
     LT = "LESS_THAN"
     IDENTIFIER = "IDENTIFIER"
     END = "END"
+    FUNCTION = "FUNCTION"  # New addition
 
 
 class Token:

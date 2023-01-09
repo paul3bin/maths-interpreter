@@ -11,7 +11,7 @@ REFERENCES: https://ruslanspivak.com/lsbasi-part7/
 
 from core.lexer.token import Token, TokenType
 
-SYMBOL_TABLE = {}
+SYMBOL_TABLE = {}  # where variables are stored
 
 
 class OperandNode:
@@ -31,7 +31,6 @@ class OperandNode:
 
     def __repr__(self):
         return self.__str__()
-
 
 class IdentifierNode:
     def __init__(self, token: Token):

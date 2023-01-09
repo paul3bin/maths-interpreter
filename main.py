@@ -516,7 +516,7 @@ class MainWindow(QtWidgets.QWidget):
         self.piButton.move(1106, 652)  # 1100 646
 
         self.expButton = QtWidgets.QPushButton(self)
-        self.expButton.setText("exp")
+        self.expButton.setText("e")
         self.expButton.clicked.connect(self.exponent)  # connected to a function
         self.expButton.resize(40, 21)
         self.expButton.move(1145, 652)  # 1140 646
@@ -620,7 +620,7 @@ class MainWindow(QtWidgets.QWidget):
 
         self.lastPos = cursor.position()
         self.firstPos = self.lastPos
-        cursor.insertText("exponent()")
+        cursor.insertText("2.71828182846")
         cursor.endEditBlock()
 
     def run_script(self):  # For running the main input script
