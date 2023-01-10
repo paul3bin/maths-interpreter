@@ -48,14 +48,8 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtGui import QIcon, QPixmap
-from PyQt5.QtWidgets import (
-    QApplication,
-    QLabel,
-    QMainWindow,
-    QTableWidget,
-    QVBoxLayout,
-    QWidget,
-)
+from PyQt5.QtWidgets import (QApplication, QLabel, QMainWindow, QTableWidget,
+                             QVBoxLayout, QWidget)
 
 from core import main_execute
 from core.lexer.lexicalAnalyzer import Lexer
