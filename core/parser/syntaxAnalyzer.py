@@ -1,5 +1,5 @@
 """
-AUTHORS: Ebin, Aswin
+AUTHORS: Ebin Paul, Aswin Sasi
 DESCRIPTION: The following class is used to create an Abstract Syntax Tree (AST). The operators with higher precedence
             are the located lower in the tree mean while, operators with lower precedence are located higher in the tree.
             
@@ -18,7 +18,8 @@ REFERENCES: https://pages.cs.wisc.edu/~fischer/cs536.s06/course.hold/html/NOTES/
 
 from core.lexer.lexicalAnalyzer import Lexer
 from core.lexer.token import Token, TokenType
-from .nodes import IdentifierNode, OperandNode, OperatorNode
+
+from .nodes import FunctionNode, IdentifierNode, OperandNode, OperatorNode
 
 """
 BNF :-
@@ -223,11 +224,31 @@ class Parser:
 
         return result
 
+    def function_definition(self):
+        """
+        BNF for assignment
+        <assignment> -> <variable> = <expression>
+        """
+        while (
+            self.current_token.type != TokenType.END
+            and self.current_token
+            and self.current_token.type == TokenType.FUNC
+        ):
+            function = self.current_token
+            self.next_token()
+            result = FunctionNode(function, self.factor())
+
+        return result
+
     def parse(self):
         """
         Parses the tokens list and returns an AST (Abstract Syntax Tree)
         """
-        result = self.assignment()
+
+        if self.__tokens[0].type == TokenType.FUNC:
+            result = self.function_definition()
+        else:
+            result = self.assignment()
 
         if self.parenthesis_stack:
             raise Exception("Missing parenthesis")

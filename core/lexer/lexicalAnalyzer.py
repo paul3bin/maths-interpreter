@@ -1,5 +1,5 @@
 """
-AUTHOR: Ebin Paul
+AUTHOR: Ebin Paul, Aswin Sasi
 DESCRIPTION: The following Lexer class goes through the input string and generates a list of tokens.
             
 REFERENCES: https://ruslanspivak.com/lsbasi-part7/
@@ -13,24 +13,38 @@ from .token import Token, TokenType
 
 WHITESPACE = " \t"
 ALLOWED_IDENTIFIERS = "".join(tuple(ascii_lowercase)) + "".join(tuple(ascii_uppercase))
-ALLOWED_CHARACTERS = digits + "+-/*%()^=.<> \n\t" + ALLOWED_IDENTIFIERS
-ALLOWED_OP_CHARACTERS = ("+", "-", "/", "*", "%", "(", ")", "^", "%", "=", "<", ">")
 
-ALLOWED_FUNC = ("sin", "cos", "tan", "sqt", "lgn", "lgx", "l10")  # new - testing something out
+ALLOWED_OPERATORS = {
+    "+": TokenType.PLUS,
+    "-": TokenType.MINUS,
+    "*": TokenType.MULTIPLY,
+    "/": TokenType.DIVIDE,
+    "=": TokenType.ASSIGN,
+    "==": TokenType.EQ,
+    "!": TokenType.NOT,
+    "!=": TokenType.NEQ,
+    "(": TokenType.LEFT_PARENTHESIS,
+    ")": TokenType.RIGHT_PARENTHESIS,
+    "%": TokenType.MODULO,
+    "^": TokenType.CARET,
+    "<": TokenType.LT,
+    ">": TokenType.GT,
+}
 
-OP_TOKEN_TYPE = (
-    TokenType.MULTIPLY,
-    TokenType.PLUS,
-    TokenType.DIVIDE,
-    TokenType.MINUS,
-    TokenType.LEFT_PARENTHESIS,
-    TokenType.CARET,
-    TokenType.MODULO,
-    TokenType.ASSIGN,
-    TokenType.LT,
-    TokenType.GT,
+OTHER_TOKENS = {
+    "ID": TokenType.IDENTIFIER,
+    "INT": TokenType.INTEGER,
+    "FLOAT": TokenType.FLOAT,
+    "END": TokenType.END,
+    "FUNC": TokenType.FUNC,
+}
+
+ALLOWED_CHARACTERS = (
+    digits + "".join(ALLOWED_OPERATORS.keys()) + ALLOWED_IDENTIFIERS + "."
 )
 OPERAND_TOKEN_TYPE = (TokenType.INTEGER, TokenType.FLOAT)
+
+ALLOWED_FUNCTION = ("sin", "cos", "tan", "fact")
 
 
 class Lexer:
@@ -44,7 +58,32 @@ class Lexer:
 
         self.__tokens = []
 
-    def generate_tokens(self):
+    def add_token_to_list(self, token_char: str, value=None) -> None:
+        if value:
+            self.__tokens.append(Token(OTHER_TOKENS[token_char], value))
+        else:
+            if token_char == "END":
+                self.__tokens.append(Token(OTHER_TOKENS[token_char]))
+                return
+            self.__tokens.append(Token(ALLOWED_OPERATORS[token_char], token_char))
+
+    def tokenize_number(self, number_string):
+        # checking if numbers are present in the number string.
+        # If yes, append the integer token to the token list and assign empty string to the number_string variable.
+        # If no, move on to identifying the characters and append to tokens list.
+        if "." in number_string:
+            if len(number_string) > 1:
+                self.add_token_to_list("FLOAT", float(number_string))
+                return ""
+            else:
+                raise Exception("Invalid expression.")
+
+        else:
+            self.add_token_to_list("INT", int(number_string))
+
+        return ""
+
+    def generate_tokens(self) -> None:
         """
         Generates tokens and appends it to to tokens list
         """
@@ -59,29 +98,53 @@ class Lexer:
             for character in self.__character_list:
 
                 # This is causing issues relating to variables
-                if character == '(':  # new - testing ideas
+                if character == "(":  # new - testing ideas
 
                     # 0 isn't correct cause what if func is used mid-expression
                     if len(self.__character_list) > 3:
 
-                        left_par_instances = list(filter(lambda i: self.__character_list[i] == '(', range(len(self.__character_list))))
-                        name = ''.join(self.__character_list[self.__character_list.index(character) - 3:self.__character_list.index(character)])
+                        left_par_instances = list(
+                            filter(
+                                lambda i: self.__character_list[i] == "(",
+                                range(len(self.__character_list)),
+                            )
+                        )
+                        name = "".join(
+                            self.__character_list[
+                                self.__character_list.index(character)
+                                - 3 : self.__character_list.index(character)
+                            ]
+                        )
 
                         if name in ALLOWED_FUNC:
-                            print('Hello. This line is running.')
+                            print("Hello. This line is running.")
                             count += 1
 
                             if count > 1:
-                                name = self.__character_list[left_par_instances[count-1]-3] + self.__character_list[left_par_instances[count-1]-2] + self.__character_list[left_par_instances[count-1]-1]
+                                name = (
+                                    self.__character_list[
+                                        left_par_instances[count - 1] - 3
+                                    ]
+                                    + self.__character_list[
+                                        left_par_instances[count - 1] - 2
+                                    ]
+                                    + self.__character_list[
+                                        left_par_instances[count - 1] - 1
+                                    ]
+                                )
 
                             self.__tokens.append(Token(TokenType.FUNCTION, name))
-                            self.__tokens.append(Token(TokenType.LEFT_PARENTHESIS, "'('"))
+                            self.__tokens.append(
+                                Token(TokenType.LEFT_PARENTHESIS, "'('")
+                            )
                         else:
-                            print('This line is running.')
-                            self.__tokens.append(Token(TokenType.LEFT_PARENTHESIS, "'('"))
+                            print("This line is running.")
+                            self.__tokens.append(
+                                Token(TokenType.LEFT_PARENTHESIS, "'('")
+                            )
                             self.__tokens.append(Token(TokenType.IDENTIFIER, name))
                     else:
-                        print('Nope. This line is running.')
+                        print("Nope. This line is running.")
                         self.__tokens.append(Token(TokenType.LEFT_PARENTHESIS, "'('"))
 
                 # Checking if characters present in the input string are allowed or not
@@ -103,6 +166,16 @@ class Lexer:
                     number_string += character
 
                 elif character in ALLOWED_IDENTIFIERS:
+                    if (
+                        character == "e"
+                        and len(identifier_string) == 0
+                        and number_string
+                    ):
+                        number_string = self.tokenize_number(number_string)
+                        self.add_token_to_list("*")
+                        self.tokenize_number("10")
+                        self.add_token_to_list("^")
+                        continue
                     identifier_string += character
 
                 # checking if current character is one of the following characters:
@@ -115,34 +188,35 @@ class Lexer:
                         if number_string:
                             raise Exception("Invalid expression.")
 
-                        # Max testing rn
+                        if character == "(":
+                            if identifier_string in ALLOWED_FUNCTION:
+                                self.add_token_to_list("FUNC", identifier_string)
+                                self.add_token_to_list(character)
+                                identifier_string = ""
+                                continue
+                            else:
+                                raise Exception("Function not defined.")
+
+                        self.add_token_to_list("ID", identifier_string)
 
                         # -2 before function is before left_parenthesis
-                        if len(self.__tokens)-2 >= 0:
-                            if self.__tokens[len(self.__tokens)-2].type != TokenType.FUNCTION: # testing - Max rn
-                                self.__tokens.append(Token(TokenType.IDENTIFIER, identifier_string))
-                        else:
-                            self.__tokens.append(Token(TokenType.IDENTIFIER, identifier_string))
-                        identifier_string = ""
-
-                    # checking if numbers are present in the number string.
-                    # If yes, append the integer token to the token list and assign empty string to the number_string variable.
-                    # If no, move on to identifying the characters and append to tokens list.
-                    elif number_string:
-                        if "." in number_string:
-                            if len(number_string) > 1:
+                        if len(self.__tokens) - 2 >= 0:
+                            if (
+                                self.__tokens[len(self.__tokens) - 2].type
+                                != TokenType.FUNCTION
+                            ):  # testing - Max rn
                                 self.__tokens.append(
-                                    Token(TokenType.FLOAT, float(number_string))
+                                    Token(TokenType.IDENTIFIER, identifier_string)
                                 )
-                                number_string = ""
-                            else:
-                                raise Exception("Invalid expression.")
-
                         else:
                             self.__tokens.append(
-                                Token(TokenType.INTEGER, int(number_string))
+                                Token(TokenType.IDENTIFIER, identifier_string)
                             )
-                            number_string = ""
+                        identifier_string = ""
+
+                    # tokenizing number
+                    elif number_string:
+                        number_string = self.tokenize_number(number_string)
 
                     if character == "+":
                         self.__tokens.append(Token(TokenType.PLUS, "'+'"))
@@ -181,8 +255,8 @@ class Lexer:
                         else:
                             self.__tokens.append(Token(TokenType.DIVIDE, "'/'"))
 
-                    #elif character == "(":
-                        #self.__tokens.append(Token(TokenType.LEFT_PARENTHESIS, "'('"))
+                    # elif character == "(":
+                    # self.__tokens.append(Token(TokenType.LEFT_PARENTHESIS, "'('"))
 
                     elif character == ")":
                         self.__tokens.append(Token(TokenType.RIGHT_PARENTHESIS, "')'"))
@@ -271,7 +345,9 @@ class Lexer:
             if number_string:
                 if "." in number_string:
                     if len(number_string) > 1:
-                        self.__tokens.append(Token(TokenType.FLOAT, float(number_string)))
+                        self.__tokens.append(
+                            Token(TokenType.FLOAT, float(number_string))
+                        )
                         number_string = ""
                     else:
                         raise Exception("Invalid expression.")
@@ -301,43 +377,105 @@ class Lexer:
 
             # think it's to do with the order of the while loop and if statement
             if x.type == TokenType.FUNCTION:
-                while (TokenType.FUNCTION in type_list):
+                while TokenType.FUNCTION in type_list:
                     if type_list.count(TokenType.LEFT_PARENTHESIS) != 0:
-                        if type_list.count(TokenType.LEFT_PARENTHESIS) == type_list.count(TokenType.RIGHT_PARENTHESIS):
+                        if type_list.count(
+                            TokenType.LEFT_PARENTHESIS
+                        ) == type_list.count(TokenType.RIGHT_PARENTHESIS):
 
                             # think this might need to be switched around
-                            start = list(filter(lambda i: type_list[i] == TokenType.LEFT_PARENTHESIS, range(len(type_list)))).pop()  # also removes last element
-                            end = list(filter(lambda i: type_list[i] == TokenType.RIGHT_PARENTHESIS, range(len(type_list))))[0]  # DOESNT remove last element yet
+                            start = list(
+                                filter(
+                                    lambda i: type_list[i]
+                                    == TokenType.LEFT_PARENTHESIS,
+                                    range(len(type_list)),
+                                )
+                            ).pop()  # also removes last element
+                            end = list(
+                                filter(
+                                    lambda i: type_list[i]
+                                    == TokenType.RIGHT_PARENTHESIS,
+                                    range(len(type_list)),
+                                )
+                            )[
+                                0
+                            ]  # DOESNT remove last element yet
 
-                            if self.__tokens[start-1].type == TokenType.FUNCTION:  # if theres a function before the inner brackets list - find out what the function is
+                            if (
+                                self.__tokens[start - 1].type == TokenType.FUNCTION
+                            ):  # if theres a function before the inner brackets list - find out what the function is
 
-                                if self.__tokens[start-1].value == 'sin':
-                                    self.__tokens[start-1] = function(self.__tokens[start+1:end]).sin()  # just for testing and fun
-                                    type_list[start - 1] = function(self.__tokens[start + 1:end]).sin().type
-                                elif self.__tokens[start-1].value == 'cos':
-                                    self.__tokens[start-1] = function(self.__tokens[start+1:end]).cos()  # just for testing and fun
-                                    type_list[start - 1] = function(self.__tokens[start + 1:end]).cos().type
-                                elif self.__tokens[start - 1].value == 'tan':
-                                    self.__tokens[start-1] = function(self.__tokens[start+1:end]).tan()  # just for testing and fun
-                                    type_list[start - 1] = function(self.__tokens[start + 1:end]).tan().type
-                                elif self.__tokens[start-1].value == 'lgx':
-                                    self.__tokens[start-1] = function(self.__tokens[start+1:end]).lgx()  # just for testing and fun
-                                    type_list[start - 1] = function(self.__tokens[start + 1:end]).lgx().type
-                                elif self.__tokens[start-1].value == 'l10':
-                                    self.__tokens[start-1] = function(self.__tokens[start+1:end]).l10()  # just for testing and fun
-                                    type_list[start - 1] = function(self.__tokens[start + 1:end]).l10().type
-                                elif self.__tokens[start - 1].value == 'lgn':
-                                    self.__tokens[start-1] = function(self.__tokens[start+1:end]).lgn()  # just for testing and fun
-                                    type_list[start - 1] = function(self.__tokens[start + 1:end]).lgn().type
-                                elif self.__tokens[start-1].value == 'sqt':
+                                if self.__tokens[start - 1].value == "sin":
+                                    self.__tokens[start - 1] = function(
+                                        self.__tokens[start + 1 : end]
+                                    ).sin()  # just for testing and fun
+                                    type_list[start - 1] = (
+                                        function(self.__tokens[start + 1 : end])
+                                        .sin()
+                                        .type
+                                    )
+                                elif self.__tokens[start - 1].value == "cos":
+                                    self.__tokens[start - 1] = function(
+                                        self.__tokens[start + 1 : end]
+                                    ).cos()  # just for testing and fun
+                                    type_list[start - 1] = (
+                                        function(self.__tokens[start + 1 : end])
+                                        .cos()
+                                        .type
+                                    )
+                                elif self.__tokens[start - 1].value == "tan":
+                                    self.__tokens[start - 1] = function(
+                                        self.__tokens[start + 1 : end]
+                                    ).tan()  # just for testing and fun
+                                    type_list[start - 1] = (
+                                        function(self.__tokens[start + 1 : end])
+                                        .tan()
+                                        .type
+                                    )
+                                elif self.__tokens[start - 1].value == "lgx":
+                                    self.__tokens[start - 1] = function(
+                                        self.__tokens[start + 1 : end]
+                                    ).lgx()  # just for testing and fun
+                                    type_list[start - 1] = (
+                                        function(self.__tokens[start + 1 : end])
+                                        .lgx()
+                                        .type
+                                    )
+                                elif self.__tokens[start - 1].value == "l10":
+                                    self.__tokens[start - 1] = function(
+                                        self.__tokens[start + 1 : end]
+                                    ).l10()  # just for testing and fun
+                                    type_list[start - 1] = (
+                                        function(self.__tokens[start + 1 : end])
+                                        .l10()
+                                        .type
+                                    )
+                                elif self.__tokens[start - 1].value == "lgn":
+                                    self.__tokens[start - 1] = function(
+                                        self.__tokens[start + 1 : end]
+                                    ).lgn()  # just for testing and fun
+                                    type_list[start - 1] = (
+                                        function(self.__tokens[start + 1 : end])
+                                        .lgn()
+                                        .type
+                                    )
+                                elif self.__tokens[start - 1].value == "sqt":
                                     print(self.__tokens)
-                                    self.__tokens[start - 1] = function(self.__tokens[start + 1:end]).sqt()  # just for testing and fun
-                                    type_list[start-1] = function(self.__tokens[start+1:end]).sqt().type
+                                    self.__tokens[start - 1] = function(
+                                        self.__tokens[start + 1 : end]
+                                    ).sqt()  # just for testing and fun
+                                    type_list[start - 1] = (
+                                        function(self.__tokens[start + 1 : end])
+                                        .sqt()
+                                        .type
+                                    )
 
-                                del self.__tokens[start:end+1]  # deletes the parenthesis
-                                del type_list[start:end+1]
+                                del self.__tokens[
+                                    start : end + 1
+                                ]  # deletes the parenthesis
+                                del type_list[start : end + 1]
 
                         else:
-                            raise Exception('Missing parenthesis(es)')
+                            raise Exception("Missing parenthesis(es)")
 
         return self.__tokens

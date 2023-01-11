@@ -1,5 +1,5 @@
 """
-AUTHOR: Ebin, Aswin
+AUTHOR: Ebin Paul, Aswin Sasi
 DESCRIPTION: The following classes are nodes of Abstract Syntax Tree (AST). Each class has a get_node_value method which returns,
             the value of that particular node
             
@@ -42,6 +42,21 @@ class IdentifierNode:
             return SYMBOL_TABLE[self.__value]
         except:
             raise Exception(f"{self.__value} not defined.")
+
+    def __str__(self):
+        return self.__value
+
+    def __repr__(self):
+        return self.__str__()
+
+
+class FunctionNode:
+    def __init__(self, token: Token, value):
+        self.token: Token = token
+        self.leaf_node = value
+
+    def get_node_value(self):
+        return f"{self.token.value}({self.leaf_node})"
 
     def __str__(self):
         return self.__value
