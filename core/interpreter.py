@@ -3,8 +3,6 @@ AUTHOR: Ebin Paul
 
 """
 
-from core.parser.nodes import Token, TokenType
-
 from .parser.syntaxAnalyzer import Parser
 
 
