@@ -11,9 +11,7 @@ REFERENCES: https://ruslanspivak.com/lsbasi-part7/
 
 from core.lexer.token import Token, TokenType
 
-# from core.functions import factorial
-
-SYMBOL_TABLE = {}
+SYMBOL_TABLE = {}  # where variables are stored
 
 
 class OperandNode:

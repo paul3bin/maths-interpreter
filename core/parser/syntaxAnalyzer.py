@@ -19,7 +19,7 @@ REFERENCES: https://pages.cs.wisc.edu/~fischer/cs536.s06/course.hold/html/NOTES/
 from core.lexer.lexicalAnalyzer import Lexer
 from core.lexer.token import Token, TokenType
 
-from .nodes import IdentifierNode, OperandNode, OperatorNode, FunctionNode
+from .nodes import FunctionNode, IdentifierNode, OperandNode, OperatorNode
 
 """
 BNF :-

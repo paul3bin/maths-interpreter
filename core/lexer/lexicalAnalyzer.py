@@ -58,13 +58,29 @@ class Lexer:
         self.__tokens = []
 
     def add_token_to_list(self, token_char: str, value=None) -> None:
-        if value:
+        if value != None:
             self.__tokens.append(Token(OTHER_TOKENS[token_char], value))
         else:
             if token_char == "END":
                 self.__tokens.append(Token(OTHER_TOKENS[token_char]))
                 return
             self.__tokens.append(Token(ALLOWED_OPERATORS[token_char], token_char))
+
+    def tokenize_number(self, number_string):
+        # checking if numbers are present in the number string.
+        # If yes, append the integer token to the token list and assign empty string to the number_string variable.
+        # If no, move on to identifying the characters and append to tokens list.
+        if "." in number_string:
+            if len(number_string) > 1:
+                self.add_token_to_list("FLOAT", float(number_string))
+                return ""
+            else:
+                raise Exception("Invalid expression.")
+
+        else:
+            self.add_token_to_list("INT", int(number_string))
+
+        return ""
 
     def generate_tokens(self) -> None:
         """
@@ -98,6 +114,16 @@ class Lexer:
                     number_string += character
 
                 elif character in ALLOWED_IDENTIFIERS:
+                    if (
+                        character == "e"
+                        and len(identifier_string) == 0
+                        and number_string
+                    ):
+                        number_string = self.tokenize_number(number_string)
+                        self.add_token_to_list("*")
+                        self.tokenize_number("10")
+                        self.add_token_to_list("^")
+                        continue
                     identifier_string += character
 
                 # checking if current character is one of the allowed operand characters:
@@ -122,20 +148,9 @@ class Lexer:
 
                         identifier_string = ""
 
-                    # checking if numbers are present in the number string.
-                    # If yes, append the integer token to the token list and assign empty string to the number_string variable.
-                    # If no, move on to identifying the characters and append to tokens list.
+                    # tokenizing number
                     elif number_string:
-                        if "." in number_string:
-                            if len(number_string) > 1:
-                                self.add_token_to_list("FLOAT", float(number_string))
-                                number_string = ""
-                            else:
-                                raise Exception("Invalid expression.")
-
-                        else:
-                            self.add_token_to_list("INT", int(number_string))
-                            number_string = ""
+                        number_string = self.tokenize_number(number_string)
 
                     # Checking if the current character is = operator,
                     # and appending a token with token-type ASSIGN to the tokens list
@@ -166,16 +181,7 @@ class Lexer:
 
             # if number string is not empty once loop ends,then add the integer token to the list
             if number_string:
-                if "." in number_string:
-                    if len(number_string) > 1:
-                        self.add_token_to_list("FLOAT", float(number_string))
-                        number_string = ""
-                    else:
-                        raise Exception("Invalid expression.")
-
-                else:
-                    self.add_token_to_list("INT", int(number_string))
-                    number_string = ""
+                number_string = self.tokenize_number(number_string)
 
             # if identifier string is not empty once loop ends,then add the identifier token to the list
             if identifier_string:
