@@ -24,8 +24,6 @@ class function:
 
     def sqt(self):
 
-        print('hi')
-
         toks = self.tokens
 
         if len(self.tokens) > 1:  # check if tokens is longer than 1
