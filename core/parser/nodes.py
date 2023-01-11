@@ -32,6 +32,7 @@ class OperandNode:
     def __repr__(self):
         return self.__str__()
 
+
 class IdentifierNode:
     def __init__(self, token: Token):
         self.token: Token = token

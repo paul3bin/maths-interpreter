@@ -1,5 +1,6 @@
 """
 AUTHOR: Ebin Paul
+
 """
 
 from core.parser.nodes import Token, TokenType
@@ -10,6 +11,7 @@ from .parser.syntaxAnalyzer import Parser
 class Interpreter:
     """
     Interpreter class:
+
     initialized with the input string.
     First instance variable tokens is initialized with gets a list of tokens from Lexer class based on the input string provided.
     The second instance variable is a root node of the AST (Abstract Syntax Tree) which is obtained as a result from Parser class.

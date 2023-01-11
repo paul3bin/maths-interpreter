@@ -1,5 +1,7 @@
-from core.lexer.token import Token, TokenType
 import re
+
+from core.lexer.token import Token, TokenType
+
 
 class function:
     tokens = []
