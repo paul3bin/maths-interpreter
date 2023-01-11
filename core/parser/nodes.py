@@ -67,6 +67,18 @@ def factorial(f1: int):
         return "No factorial for negative numbers"
 
 
+def sin_function(s1=int):
+    sin_ans1 = (s1 % 360) * 3.1415 / 180
+    sin_ans2 = sin_ans1
+    for i in range(1, 20):
+        y = (2 * i) + 1
+        if i % 2 == 1:
+            sin_ans2 -= (sin_ans1**y) / factorial(y)
+        else:
+            sin_ans2 += (sin_ans1**y) / factorial(y)
+    return round(sin_ans2, 4)
+
+
 class FunctionNode:
     def __init__(self, token: Token, value):
         self.token: Token = token
@@ -79,6 +91,9 @@ class FunctionNode:
             # return self.leaf_node.get_node_value()
             f_ans = factorial(self.leaf_node.get_node_value())
             return f_ans
+        elif self.token.value == "sin":
+            s_ans = sin_function(self.leaf_node.get_node_value())
+            return s_ans
 
     def __str__(self):
         return self.__value
