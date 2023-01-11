@@ -43,7 +43,7 @@ ALLOWED_CHARACTERS = (
     digits + "".join(ALLOWED_OPERATORS.keys()) + ALLOWED_IDENTIFIERS + "."
 )
 
-ALLOWED_FUNCTION = ("sin", "cos", "tan", "fact")
+ALLOWED_FUNCTION = ("sin", "cos", "tan", "fact", "root")
 
 
 class Lexer:

@@ -11,6 +11,8 @@ REFERENCES: https://ruslanspivak.com/lsbasi-part7/
 
 from core.lexer.token import Token, TokenType
 
+# from core.functions import factorial
+
 SYMBOL_TABLE = {}
 
 
@@ -51,13 +53,32 @@ class IdentifierNode:
         return self.__str__()
 
 
+# function delclarations
+
+
+def factorial(f1: int):
+    fact_answer = 1
+    if f1 >= 0:
+        while f1 >= 1:
+            fact_answer *= f1
+            f1 -= 1
+        return fact_answer
+    else:
+        return "No factorial for negative numbers"
+
+
 class FunctionNode:
     def __init__(self, token: Token, value):
         self.token: Token = token
-        self.leaf_node = value
+        self.leaf_node: OperandNode or IdentifierNode = value
 
     def get_node_value(self):
-        return f"{self.token.value}({self.leaf_node})"
+        # return f"{self.token.value}({self.leaf_node})"
+        if self.token.value == "fact":
+            # return factorial(self.leaf_node.get_node_value())
+            # return self.leaf_node.get_node_value()
+            f_ans = factorial(self.leaf_node.get_node_value())
+            return f_ans
 
     def __str__(self):
         return self.__value
