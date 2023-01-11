@@ -41,6 +41,7 @@ References: https://stackoverflow.com/questions/15263063/why-keypress-event-in-p
             https://matplotlib.org/3.3.4/gallery/recipes/placing_text_boxes.html
 """
 
+from zero_crossing import bisection_method
 from core.interpreter import Interpreter
 from core.lexer.lexicalAnalyzer import Lexer
 from core.lexer.token import TokenType
@@ -97,7 +98,7 @@ class PlotWindow:
         ax.xaxis.set_ticks_position("bottom")
         ax.yaxis.set_ticks_position("left")
 
-        text_box = "Zero crossings = "
+        text_box = "Zero crossings = \n" + str(bisection_method(function[0], int(function[1]), int(function[2])))
         props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
         ax.text(0.05, 0.95, text_box, transform=ax.transAxes, fontsize=10, verticalalignment='top', bbox=props)
 
