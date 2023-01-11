@@ -112,6 +112,12 @@ class FunctionNode:
             c_ans = cos_function(self.leaf_node.get_node_value())
             return c_ans
 
+        elif self.token.value == "tan":
+            t_ans = sin_function(self.leaf_node.get_node_value()) / cos_function(
+                self.leaf_node.get_node_value()
+            )
+            return round(t_ans, 3)
+
     def __str__(self):
         return self.__value
 
