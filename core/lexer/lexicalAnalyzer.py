@@ -181,16 +181,7 @@ class Lexer:
 
             # if number string is not empty once loop ends,then add the integer token to the list
             if number_string:
-                if "." in number_string:
-                    if len(number_string) > 1:
-                        self.add_token_to_list("FLOAT", float(number_string))
-                        number_string = ""
-                    else:
-                        raise Exception("Invalid expression.")
-
-                else:
-                    self.add_token_to_list("INT", int(number_string))
-                    number_string = ""
+                number_string = self.tokenize_number(number_string)
 
             # if identifier string is not empty once loop ends,then add the identifier token to the list
             if identifier_string:
