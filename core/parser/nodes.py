@@ -81,7 +81,7 @@ class FunctionNode:
             return round(t_ans, 3)
 
     def __str__(self):
-        return self.__value
+        return f"{self.token.value}({self.leaf_node.get_node_value()})"
 
     def __repr__(self):
         return self.__str__()

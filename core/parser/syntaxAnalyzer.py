@@ -66,7 +66,7 @@ class Parser:
 
     def factor(self):
         """
-        <factor> -> <number> |  (expression)
+        <factor> -> <builtin-function> | <number> |  (expression)
         """
         token = self.current_token
 
@@ -107,6 +107,18 @@ class Parser:
             result = self.expression()
 
             self.next_token()
+            return result
+
+        elif token.type == TokenType.FUNC:
+            while (
+                self.current_token.type != TokenType.END
+                and self.current_token
+                and self.current_token.type == TokenType.FUNC
+            ):
+                function = self.current_token
+                self.next_token()
+                result = FunctionNode(function, self.factor())
+
             return result
 
     def power(self):
@@ -224,31 +236,12 @@ class Parser:
 
         return result
 
-    def function_definition(self):
-        """
-        BNF for assignment
-        <assignment> -> <variable> = <expression>
-        """
-        while (
-            self.current_token.type != TokenType.END
-            and self.current_token
-            and self.current_token.type == TokenType.FUNC
-        ):
-            function = self.current_token
-            self.next_token()
-            result = FunctionNode(function, self.factor())
-
-        return result
-
     def parse(self):
         """
         Parses the tokens list and returns an AST (Abstract Syntax Tree)
         """
 
-        if self.__tokens[0].type == TokenType.FUNC:
-            result = self.function_definition()
-        else:
-            result = self.assignment()
+        result = self.assignment()
 
         if self.parenthesis_stack:
             raise Exception("Missing parenthesis")
