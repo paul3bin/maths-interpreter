@@ -98,9 +98,10 @@ class PlotWindow:
         ax.xaxis.set_ticks_position("bottom")
         ax.yaxis.set_ticks_position("left")
 
-        text_box = "Zero crossings = \n" + str(bisection_method(function[0], int(function[1]), int(function[2])))
-        props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
-        ax.text(0.05, 0.95, text_box, transform=ax.transAxes, fontsize=10, verticalalignment='top', bbox=props)
+        if function[3] != '' and function[4] != '':
+            text_box = "Zero crossings = \n" + str(bisection_method(function[0], int(function[1]), int(function[2])))
+            props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
+            ax.text(0.05, 0.95, text_box, transform=ax.transAxes, fontsize=10, verticalalignment='top', bbox=props)
 
         # plot the function
         plt.plot(x, y, "r")
@@ -117,8 +118,8 @@ class PlotInputWindow(QtWidgets.QWidget):
 
     def __init__(self):
         QtWidgets.QWidget.__init__(self)
-        self.setGeometry(550, 370, 350, 165)  # Size of the window
-        self.setFixedSize(350, 165)
+        self.setGeometry(550, 370, 350, 210)  # Size of the window
+        self.setFixedSize(350, 210)
 
         title = QLabel(self)
         pixmap = QPixmap("./ui/images/plot1.jpg")
@@ -147,19 +148,33 @@ class PlotInputWindow(QtWidgets.QWidget):
         self.inputBox_right.move(170, 75)
         self.inputBox_right.resize(30, 30)
 
+        self.inputBox_left2 = QtWidgets.QTextEdit(self)
+        self.inputBox_left2.move(120, 115)
+        self.inputBox_left2.resize(30, 30)
+
+        to_label = QLabel(self)
+        pixmap = QPixmap("./ui/images/plot4.jpg")
+        to_label.setPixmap(pixmap.scaled(16, 16, aspectRatioMode=QtCore.Qt.KeepAspectRatio))
+        to_label.move(151, 123)
+
+        self.inputBox_right2 = QtWidgets.QTextEdit(self)
+        self.inputBox_right2.move(170, 115)
+        self.inputBox_right2.resize(30, 30)
+
         b1 = QtWidgets.QPushButton(self)
         b1.setText("Submit")
         b1.clicked.connect(self.switch)
-        b1.move(125, 110)
+        b1.move(125, 155)
 
         self.error = QLabel(self)
         pixmap = QPixmap("./ui/images/plot3.jpg")
         self.error.setPixmap(pixmap.scaled(130, 130, aspectRatioMode=QtCore.Qt.KeepAspectRatio))
-        self.error.move(100, 140)
+        self.error.move(100, 185)
         self.error.setVisible(False)  # Initially set as False, unless error occurs
 
     def switch(self):
-        self.switch_window.emit(self.inputBox.toPlainText()+"|"+self.inputBox_left.toPlainText()+"|"+self.inputBox_right.toPlainText())
+        self.switch_window.emit(self.inputBox.toPlainText()+"|"+self.inputBox_left.toPlainText()+"|"+self.inputBox_right.toPlainText()
+                                +"|"+self.inputBox_left2.toPlainText()+"|"+self.inputBox_right2.toPlainText())
 
 
 class SaveWindow(QtWidgets.QWidget):
@@ -681,7 +696,6 @@ class Controller:
             self.window = None
 
         try:
-            # IN DEVELOPMENT
             if (re.search(r"^[a-zA-Z0-9]*$", self.saveWin.name.toPlainText()) == None):  # if there is a space
                 self.saveWin.error.setVisible(True)
         except:
