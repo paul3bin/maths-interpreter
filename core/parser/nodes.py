@@ -79,6 +79,18 @@ def sin_function(s1=int):
     return round(sin_ans2, 4)
 
 
+def cos_function(s1=int):
+    cos_ans1 = (s1 % 360) * 3.1415 / 180
+    cos_ans2 = 1
+    for i in range(1, 20):
+        y = 2 * i
+        if i % 2 == 1:
+            cos_ans2 -= (cos_ans1**y) / factorial(y)
+        else:
+            cos_ans2 += (cos_ans1**y) / factorial(y)
+    return round(cos_ans2, 3)
+
+
 class FunctionNode:
     def __init__(self, token: Token, value):
         self.token: Token = token
@@ -91,9 +103,14 @@ class FunctionNode:
             # return self.leaf_node.get_node_value()
             f_ans = factorial(self.leaf_node.get_node_value())
             return f_ans
+
         elif self.token.value == "sin":
             s_ans = sin_function(self.leaf_node.get_node_value())
             return s_ans
+
+        elif self.token.value == "cos":
+            c_ans = cos_function(self.leaf_node.get_node_value())
+            return c_ans
 
     def __str__(self):
         return self.__value
