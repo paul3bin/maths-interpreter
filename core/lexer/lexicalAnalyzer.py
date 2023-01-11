@@ -58,7 +58,7 @@ class Lexer:
         self.__tokens = []
 
     def add_token_to_list(self, token_char: str, value=None) -> None:
-        if value:
+        if value != None:
             self.__tokens.append(Token(OTHER_TOKENS[token_char], value))
         else:
             if token_char == "END":
