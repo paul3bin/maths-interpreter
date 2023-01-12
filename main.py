@@ -442,8 +442,8 @@ class MainWindow(QtWidgets.QWidget):
         self.sqrtButton.move(1145, 632)
 
         self.lnButton = QtWidgets.QPushButton(self)
-        self.lnButton.setText("π")
-        self.lnButton.clicked.connect(self.pi)  # connected to a function
+        self.lnButton.setText("root")
+        self.lnButton.clicked.connect(self.root)  # connected to a function
         self.lnButton.resize(40, 41)
         self.lnButton.move(1184, 632)
 
@@ -489,14 +489,14 @@ class MainWindow(QtWidgets.QWidget):
         cursor.insertText("tan()")
         cursor.endEditBlock()
 
-    def pi(self):
+    def root(self):
         cursor = QtGui.QTextCursor(self.outputBox.document())
         cursor.beginEditBlock()
         cursor.movePosition(QtGui.QTextCursor.End, QtGui.QTextCursor.MoveAnchor)
 
         self.lastPos = cursor.position()
         self.firstPos = self.lastPos
-        cursor.insertText("3.141592653589793238")
+        cursor.insertText("root()")
         cursor.endEditBlock()
 
     def factorial(self):
