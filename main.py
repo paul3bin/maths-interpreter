@@ -1,7 +1,7 @@
 """
-Author(s):   Max James, Ebin Paul, Christopher Gavey, Aswin, Soniya
+Author:      Max James
 
-Date:        25/11/22
+Date:        10/01/23
 
 Description: The graphical user interface for the maths interpreter software. This works by taking strings from the input
              boxes and then feeding them into the interpreter (going through the lexer, parser, and execution pass).
@@ -16,7 +16,7 @@ Description: The graphical user interface for the maths interpreter software. Th
              extra windows for opening a file, saving a file, and for writing in the f(x) function before displaying the
              Matplotlib plot.
 
-Version:     V3
+Version:     V5
 
 History:     V1 - Basic layout for main window of GUI made
              V1.1 - Basic outline for variable assignment window made
@@ -26,13 +26,22 @@ History:     V1 - Basic layout for main window of GUI made
              V2.1 - Bug fixes to the code
              V3 - Implementing the ability to add a plot
              V3.1 - Data validation added for all the windows (might need to update for save window)
+             V4 - Variable dependencies added
+             V4.1 - Small bug fixes to the variable dependencies, removing dependencies when re-defined
+             V4.2 - Made changes to PlotInputWindow, to include intervals
+             V4.3 - Variables output, Y-Axis now stationary, Stylesheet changed
+             V4.4 - Updated values to account for new Stylesheet used
+             V5 - Code fully cleaned up and everything working as planned, even on Windows machines
 
 References: https://stackoverflow.com/questions/15263063/why-keypress-event-in-pyqt-does-not-work-for-key-enter
             https://stackoverflow.com/questions/72169262/pyqt5-access-mainwindow-from-another-window
             https://www.geeksforgeeks.org/pyqt5-qtablewidget/
+            https://zetcode.com/gui/pyqt5/layout/
+            https://doc.qt.io/qtforpython/overviews/layout.html
+            https://matplotlib.org/3.3.4/gallery/recipes/placing_text_boxes.html
 """
 
-import re  # maybe need to use for data validation/verification
+import re
 import sys
 from os import listdir
 
@@ -45,67 +54,88 @@ from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtWidgets import (QApplication, QLabel, QMainWindow, QTableWidget,
                              QVBoxLayout, QWidget)
 
-from core import main_execute
+from core.interpreter import Interpreter
 from core.lexer.lexicalAnalyzer import Lexer
 from core.lexer.token import TokenType
 
 
 class PlotWindow:
     def __init__(self, function):
+        print(function)
 
-        # 100 linearly spaced numbers
-        first = -5
-        last = 5
+        function = function.split("|")
 
-        x = np.linspace(first, last, 100)
-        y = np.zeros(100)
+        # linearly spaced numbers from 'function[1]' to 'function[2]'
+        x = np.linspace(int(function[1]), int(function[2]), 100)  # 100 of these values
+        y = np.zeros(100)  # y list of the same length
+
+        __tokens = Lexer(
+            function[0]
+        ).get_tokens()  # get the tokens of inputted function
 
         for i in range(len(x)):
-            __tokens = Lexer(function).get_tokens()
+            string_build = ""  # builds string that's read into interpreter
+            for z in range(len(__tokens)):  # for every token in string
 
-            # Check if the form 5x is there - Additional feature
+                if (
+                    __tokens[z].type == TokenType.IDENTIFIER
+                ):  # if token is an identifier
 
-            string_build = ""
-            for z in range(len(__tokens)):
-
-                if __tokens[z].type == TokenType.IDENTIFIER:
-
-                    if (
-                        __tokens[z].value != "x"
-                    ):  # what happens if we have a variable called x?
+                    if __tokens[z].value != "x":  # if identifier is 'x'
+                        # replace with variable value
                         string_build = (
                             string_build
                             + "("
-                            + str(main_execute(__tokens[z].value))
+                            + str(Interpreter(__tokens[z].value).execute())
                             + ")"
                         )
                     else:
-                        string_build = string_build + "(" + str(x[i]) + ")"
+                        string_build = (
+                            string_build + "(" + str(x[i]) + ")"
+                        )  # replace value within 'x' list
 
                 elif (
                     __tokens[z].type == TokenType.INTEGER
                     or __tokens[z].type == TokenType.FLOAT
                 ):
+                    # puts numbers in brackets to ensure BODMAS
                     string_build = string_build + "(" + str(__tokens[z].value) + ")"
+                else:  # if it's not any of the three aformentioned token types
+                    string_build = string_build + __tokens[z].value.replace(
+                        "'", ""
+                    )  # add to string
 
-                else:
-                    string_build = string_build + __tokens[z].value.replace("'", "")
-
-            y[i] = main_execute(string_build)
+            # print(string_build)
+            y[i] = Interpreter(
+                string_build
+            ).execute()  # calculate and add to y at correct index
 
         # setting the axes at the centre
         fig = plt.figure()
         ax = fig.add_subplot(1, 1, 1)
-        ax.spines["left"].set_position("center")
+        ax.spines["left"].set_position("zero")
         ax.spines["bottom"].set_position("zero")
         ax.spines["right"].set_color("none")
         ax.spines["top"].set_color("none")
         ax.xaxis.set_ticks_position("bottom")
         ax.yaxis.set_ticks_position("left")
 
+        text_box = "Zero crossings = "
+        props = dict(boxstyle="round", facecolor="wheat", alpha=0.5)
+        ax.text(
+            0.05,
+            0.95,
+            text_box,
+            transform=ax.transAxes,
+            fontsize=14,
+            verticalalignment="top",
+            bbox=props,
+        )
+
         # plot the function
         plt.plot(x, y, "r")
-        plt.title("Plot for " + function)
+        plt.title("Plot for " + function[0])
+
         plt.grid()
 
         # show the plot
@@ -117,42 +147,63 @@ class PlotInputWindow(QtWidgets.QWidget):
 
     def __init__(self):
         QtWidgets.QWidget.__init__(self)
-        self.setGeometry(550, 370, 350, 130)  # Size of the window
-        self.setFixedSize(350, 130)
-        name = QtWidgets.QLabel(self)
-        name.setText("<b>Plot Input</b>")
-        font = name.font()
-        font.setPointSize(20)
-        name.setFont(font)
-        name.move(122, 10)
+        self.setGeometry(550, 370, 350, 165)  # Size of the window
+        self.setFixedSize(350, 165)
 
-        name = QtWidgets.QLabel(self)
-        name.setText("y = ")
-        font = name.font()
-        font.setPointSize(15)
-        name.setFont(font)
-        name.move(90, 45)
+        title = QLabel(self)
+        pixmap = QPixmap("./ui/images/plot1.jpg")
+        title.setPixmap(
+            pixmap.scaled(90, 90, aspectRatioMode=QtCore.Qt.KeepAspectRatio)
+        )
+        title.move(123, 14)
+
+        assignments = QLabel(self)
+        pixmap = QPixmap("./ui/images/plot2.jpg")
+        assignments.setPixmap(
+            pixmap.scaled(70, 70, aspectRatioMode=QtCore.Qt.KeepAspectRatio)
+        )
+        assignments.move(43, 50)
+
+        to_label = QLabel(self)
+        pixmap = QPixmap("./ui/images/plot4.jpg")
+        to_label.setPixmap(
+            pixmap.scaled(16, 16, aspectRatioMode=QtCore.Qt.KeepAspectRatio)
+        )
+        to_label.move(151, 85)
 
         self.inputBox = QtWidgets.QTextEdit(self)
         self.inputBox.move(120, 40)
         self.inputBox.resize(140, 30)
 
+        self.inputBox_left = QtWidgets.QTextEdit(self)
+        self.inputBox_left.move(120, 75)
+        self.inputBox_left.resize(30, 30)
+
+        self.inputBox_right = QtWidgets.QTextEdit(self)
+        self.inputBox_right.move(170, 75)
+        self.inputBox_right.resize(30, 30)
+
         b1 = QtWidgets.QPushButton(self)
         b1.setText("Submit")
         b1.clicked.connect(self.switch)
-        b1.move(125, 70)
+        b1.move(125, 110)
 
-        self.error = QtWidgets.QLabel("Red", self)
-        self.error.setStyleSheet("color:tomato;")
-        self.error.setText("Plot not suitable")
-        self.font = self.error.font()
-        self.font.setPointSize(14)
-        self.error.setFont(font)
-        self.error.move(115, 102)
+        self.error = QLabel(self)
+        pixmap = QPixmap("./ui/images/plot3.jpg")
+        self.error.setPixmap(
+            pixmap.scaled(130, 130, aspectRatioMode=QtCore.Qt.KeepAspectRatio)
+        )
+        self.error.move(100, 140)
         self.error.setVisible(False)  # Initially set as False, unless error occurs
 
     def switch(self):
-        self.switch_window.emit(self.inputBox.toPlainText())
+        self.switch_window.emit(
+            self.inputBox.toPlainText()
+            + "|"
+            + self.inputBox_left.toPlainText()
+            + "|"
+            + self.inputBox_right.toPlainText()
+        )
 
 
 class SaveWindow(QtWidgets.QWidget):
@@ -162,12 +213,13 @@ class SaveWindow(QtWidgets.QWidget):
         QtWidgets.QWidget.__init__(self)
         self.setGeometry(550, 370, 350, 130)  # Size of the window
         self.setFixedSize(350, 130)
-        name = QtWidgets.QLabel(self)
-        name.setText("<b>Save script</b>")
-        font = name.font()
-        font.setPointSize(20)
-        name.setFont(font)
-        name.move(115, 10)
+
+        name_label = QLabel(self)
+        pixmap = QPixmap("./ui/images/save1.jpg")
+        name_label.setPixmap(
+            pixmap.scaled(110, 110, aspectRatioMode=QtCore.Qt.KeepAspectRatio)
+        )
+        name_label.move(113, 13)
 
         self.name = QtWidgets.QTextEdit(self)
         self.name.move(100, 40)
@@ -176,15 +228,14 @@ class SaveWindow(QtWidgets.QWidget):
         b1 = QtWidgets.QPushButton(self)
         b1.setText("Submit")
         b1.clicked.connect(self.switch)
-        b1.move(125, 70)
+        b1.move(125, 80)
 
-        self.error = QtWidgets.QLabel("Red", self)
-        self.error.setStyleSheet("color:tomato;")
-        self.error.setText("Script name not suitable")
-        font = self.error.font()
-        font.setPointSize(14)
-        self.error.setFont(font)
-        self.error.move(89, 102)
+        self.error = QLabel(self)
+        pixmap = QPixmap("./ui/images/save2.jpg")
+        self.error.setPixmap(
+            pixmap.scaled(190, 190, aspectRatioMode=QtCore.Qt.KeepAspectRatio)
+        )
+        self.error.move(70, 110)
         self.error.setVisible(False)  # Initially set as False, unless error occurs
 
     def switch(self):
@@ -203,12 +254,13 @@ class LoadWindow(QtWidgets.QWidget):
         QtWidgets.QWidget.__init__(self)
         self.setGeometry(550, 370, 350, 130)  # Size of the window
         self.setFixedSize(350, 130)
-        name = QtWidgets.QLabel(self)
-        name.setText("<b>Load script</b>")
-        font = name.font()
-        font.setPointSize(20)
-        name.setFont(font)
-        name.move(115, 10)
+
+        name_label = QLabel(self)
+        pixmap = QPixmap("./ui/images/load1.jpg")
+        name_label.setPixmap(
+            pixmap.scaled(110, 110, aspectRatioMode=QtCore.Qt.KeepAspectRatio)
+        )
+        name_label.move(113, 13)
 
         self.comboBox = QtWidgets.QComboBox(self)
         self.comboBox.move(100, 40)
@@ -221,20 +273,17 @@ class LoadWindow(QtWidgets.QWidget):
         b1 = QtWidgets.QPushButton(self)
         b1.setText("Submit")
         b1.clicked.connect(self.select)
-        b1.move(125, 70)
+        b1.move(125, 80)
 
-        self.error = QtWidgets.QLabel("Red", self)
-        self.error.setStyleSheet("color:tomato;")
-        self.error.setText("No script name selected")
-        font = self.error.font()
-        font.setPointSize(14)
-        self.error.setFont(font)
-        self.error.move(89, 102)  # 36, 32
+        self.error = QLabel(self)
+        pixmap = QPixmap("./ui/images/load2.jpg")
+        self.error.setPixmap(
+            pixmap.scaled(190, 190, aspectRatioMode=QtCore.Qt.KeepAspectRatio)
+        )
+        self.error.move(70, 110)
         self.error.setVisible(False)  # Initially set as False, unless error occurs
 
     def select(self):
-        # Use ReGex to employ data validation/verification
-        # If self.input1 is not empty ect
         if self.comboBox.currentText().strip() == "":
             self.error.setVisible(True)
         else:
@@ -249,30 +298,26 @@ class VariableWindow(QtWidgets.QWidget):
         QtWidgets.QWidget.__init__(self)
         self.setGeometry(550, 370, 350, 190)  # Size of the window
         self.setFixedSize(350, 190)
-        name = QtWidgets.QLabel(self)
-        name.setText("<b>Variable assignment</b>")
-        font = name.font()
-        font.setPointSize(20)
-        name.setFont(font)
-        name.move(85, 10)
 
-        name2 = QtWidgets.QLabel(self)
-        name2.setText("Variable name: ")
-        font2 = name2.font()
-        font2.setPointSize(15)
-        name2.setFont(font2)
-        name2.move(10, 47)
+        name_label = QLabel(self)
+        pixmap = QPixmap("./ui/images/var1.jpg")
+        name_label.setPixmap(
+            pixmap.scaled(190, 190, aspectRatioMode=QtCore.Qt.KeepAspectRatio)
+        )
+        name_label.move(83, 13)
+
+        assignments = QLabel(self)
+        pixmap = QPixmap("./ui/images/var2.jpg")
+        assignments.setPixmap(
+            pixmap.scaled(115, 115, aspectRatioMode=QtCore.Qt.KeepAspectRatio)
+        )
+        assignments.move(5, 52)
+
         self.input1 = QtWidgets.QLineEdit(self)
         self.input1.move(125, 45)
         self.input1.resize(210, 30)
         self.input1.installEventFilter(self)  # Allows event detection
 
-        name3 = QtWidgets.QLabel(self)
-        name3.setText("Value:")
-        font3 = name3.font()
-        font3.setPointSize(15)
-        name3.setFont(font3)
-        name3.move(10, 87)
         self.input2 = QtWidgets.QLineEdit(self)
         self.input2.resize(210, 30)
         self.input2.move(125, 85)
@@ -283,19 +328,18 @@ class VariableWindow(QtWidgets.QWidget):
         b1.clicked.connect(self.switch)
         b1.move(120, 125)
 
-        self.error = QtWidgets.QLabel("Red", self)
-        self.error.setStyleSheet("color:tomato;")
-        self.error.setText("Variable not suitable")
-        font = self.error.font()
-        font.setPointSize(14)
-        self.error.setFont(font)
-        self.error.move(100, 160)
+        self.error = QLabel(self)
+        pixmap = QPixmap("./ui/images/var3.jpg")
+        self.error.setPixmap(
+            pixmap.scaled(160, 160, aspectRatioMode=QtCore.Qt.KeepAspectRatio)
+        )
+        self.error.move(80, 160)
         self.error.setVisible(False)  # Initially set as False, unless error occurs
 
     def switch(self):
         text = self.input1.text() + "=" + self.input2.text()
         try:
-            main_execute(text)
+            Interpreter(text).execute()
             self.switch_window.emit(self.input1.text() + "=" + self.input2.text())
         except:
             self.error.setVisible(True)
@@ -308,36 +352,50 @@ class MainWindow(QtWidgets.QWidget):
     switch_window3 = QtCore.pyqtSignal()
     switch_window4 = QtCore.pyqtSignal()
 
-    def __init__(self, text, outputText, scriptText, pos, varHold, var, save, load):
+    def __init__(
+        self,
+        text,
+        outputText,
+        scriptText,
+        pos,
+        varHold,
+        varDec,
+        varDep,
+        var,
+        save,
+        load,
+    ):
         QtWidgets.QWidget.__init__(self)
         self.setGeometry(100, 100, 1250, 700)
         self.setFixedSize(1250, 700)
         self.setWindowTitle("MathChamp")
+
+        # might need to be changed later
+        self.varDec = varDec  # needs to be stored early
+        self.varDependencies = varDep
 
         self.varDict = varHold  # dictionary to hold the variables
         self.linePos = (
             -1
         )  # Should be -1 (unless loading after sub-window - need to do more)
 
-        # Name at the top of application
-        name = QtWidgets.QLabel(self)
-        name.setText("<b>MathChamp</b>")
-        font = name.font()
-        font.setPointSize(40)
-        name.setFont(font)
-        name.resize(235, 60)
-        name.move(90, 0)
+        name = QLabel(self)
+        pixmap = QPixmap("./ui/images/mctext.jpg")
+        name.setPixmap(
+            pixmap.scaled(300, 300, aspectRatioMode=QtCore.Qt.KeepAspectRatio)
+        )
+        name.move(80, 0)
 
         # Label at the top of application
         label = QLabel(self)
-        pixmap = QPixmap("./ui/logo.jpg")
+        pixmap = QPixmap("./ui/images/logo.jpg")
         label.setPixmap(pixmap.scaled(55, 55))
         label.adjustSize()
         label.move(26, 7)
 
         # Scripting box
         self.scriptBox = QtWidgets.QTextEdit(self)
-        self.scriptBox.resize(851, 448)
+        self.scriptBox.resize(841, 448)
         self.scriptBox.move(25, 70)
         self.scriptBox.setAlignment(Qt.AlignTop)  # Alignment of text
         self.scriptBox.installEventFilter(self)  # Allows event detection
@@ -349,7 +407,7 @@ class MainWindow(QtWidgets.QWidget):
         # Output
         self.outputBox = QtWidgets.QTextEdit(self)
         self.outputBox.resize(990, 146)
-        self.outputBox.move(25, 527)
+        self.outputBox.move(25, 529)
         self.outputBox.setAlignment(Qt.AlignTop)  # Alignment of text
         self.outputBox.installEventFilter(self)  # Allows event detection
 
@@ -391,8 +449,8 @@ class MainWindow(QtWidgets.QWidget):
         self.table.setHorizontalHeaderLabels(["Variable name", "Value"])
         self.table.setColumnWidth(0, 153)  # indexing table at 0
         self.table.setColumnWidth(1, 153)
-        self.table.resize(337, 447)
-        self.table.move(887, 70)
+        self.table.resize(347, 447)
+        self.table.move(877, 70)
         self.table.setEditTriggers(
             QtWidgets.QTableWidget.NoEditTriggers
         )  # user can't edit variable table
@@ -400,95 +458,64 @@ class MainWindow(QtWidgets.QWidget):
         # Buttons
         self.runButton = QtWidgets.QPushButton(self)
         self.runButton.setText("RUN")
-        self.runButton.setIcon(QIcon("./ui/start.jpg"))
+        self.runButton.setIcon(QIcon("./ui/images/start.jpg"))
         self.runButton.clicked.connect(self.run_script)  # runs text in script window
-        self.runButton.resize(70, 75)
-        self.runButton.move(1020, 522)
-
-        self.stopButton = QtWidgets.QPushButton(self)
-        self.stopButton.setText("STOP")
-        self.stopButton.setIcon(QIcon("./ui/stop.jpg"))
-        # self.stopButton.clicked.connect(clicked)  # connected to a function
-        self.stopButton.resize(70, 75)
-        self.stopButton.move(1089, 522)
+        self.runButton.resize(95, 65)
+        self.runButton.move(1027, 528)
 
         self.plotButton = QtWidgets.QPushButton(self)
         self.plotButton.setText("f(x)")
         self.plotButton.clicked.connect(self.plot)  # connected to a function
-        self.plotButton.resize(70, 75)
-        self.plotButton.move(1159, 522)
+        self.plotButton.resize(95, 65)
+        self.plotButton.move(1129, 528)
 
         self.varButton = QtWidgets.QPushButton(self)
         self.varButton.setText("Create variable")
         self.varButton.clicked.connect(self.variable)
-        self.varButton.resize(210, 31)
-        self.varButton.move(1020, 592)
+        self.varButton.resize(197, 21)
+        self.varButton.move(1027, 602)
 
         self.sinButton = QtWidgets.QPushButton(self)
         self.sinButton.setText("sin")
         self.sinButton.clicked.connect(self.sin)  # connected to a function
-        self.sinButton.resize(50, 31)
-        self.sinButton.move(1020, 619)
+        self.sinButton.resize(41, 41)
+        self.sinButton.move(1027, 632)
 
         self.cosButton = QtWidgets.QPushButton(self)
         self.cosButton.setText("cos")
         self.cosButton.clicked.connect(self.cos)  # connected to a function
-        self.cosButton.resize(50, 31)
-        self.cosButton.move(1060, 619)
+        self.cosButton.resize(40, 41)
+        self.cosButton.move(1067, 632)
 
         self.tanButton = QtWidgets.QPushButton(self)
         self.tanButton.setText("tan")
         self.tanButton.clicked.connect(self.tan)  # connected to a function
-        self.tanButton.resize(50, 31)
-        self.tanButton.move(1100, 619)
+        self.tanButton.resize(40, 41)
+        self.tanButton.move(1106, 632)
 
         self.sqrtButton = QtWidgets.QPushButton(self)
-        self.sqrtButton.setText("sqrt")
-        self.sqrtButton.clicked.connect(self.sqrt)  # connected to a function
-        self.sqrtButton.resize(50, 31)
-        self.sqrtButton.move(1140, 619)
+        self.sqrtButton.setText("fact")
+        self.sqrtButton.clicked.connect(self.factorial)  # connected to a function
+        self.sqrtButton.resize(40, 41)
+        self.sqrtButton.move(1145, 632)
 
         self.lnButton = QtWidgets.QPushButton(self)
-        self.lnButton.setText("ln")
-        self.lnButton.clicked.connect(self.ln)  # connected to a function
-        self.lnButton.resize(50, 31)
-        self.lnButton.move(1180, 619)
-
-        self.logxButton = QtWidgets.QPushButton(self)
-        self.logxButton.setText("logx")
-        self.logxButton.clicked.connect(self.logx)  # connected to a function
-        self.logxButton.resize(50, 31)
-        self.logxButton.move(1020, 646)
-
-        self.log10Button = QtWidgets.QPushButton(self)
-        self.log10Button.setText("log10")
-        self.log10Button.clicked.connect(self.log10)  # connected to a function
-        self.log10Button.resize(50, 31)
-        self.log10Button.move(1060, 646)
-
-        self.piButton = QtWidgets.QPushButton(self)
-        self.piButton.setText("π")
-        self.piButton.clicked.connect(self.pi)  # connected to a function
-        self.piButton.resize(50, 31)
-        self.piButton.move(1100, 646)  # 1100 646
-
-        self.expButton = QtWidgets.QPushButton(self)
-        self.expButton.setText("e")
-        self.expButton.clicked.connect(self.exponent)  # connected to a function
-        self.expButton.resize(50, 31)
-        self.expButton.move(1140, 646)  # 1140 646
+        self.lnButton.setText("π")
+        self.lnButton.clicked.connect(self.pi)  # connected to a function
+        self.lnButton.resize(40, 41)
+        self.lnButton.move(1184, 632)
 
         self.loadButton = QtWidgets.QPushButton(self)
         self.loadButton.setText("Load")
         self.loadButton.clicked.connect(self.load)  # connected to a function
-        self.loadButton.resize(60, 31)
-        self.loadButton.move(820, 40)  # 1180
+        self.loadButton.resize(45, 21)
+        self.loadButton.move(820, 45)  # 1180
 
         self.saveButton = QtWidgets.QPushButton(self)
         self.saveButton.setText("Save")
         self.saveButton.clicked.connect(self.save)  # connected to a function
-        self.saveButton.resize(60, 31)
-        self.saveButton.move(770, 40)  # 820
+        self.saveButton.resize(45, 21)
+        self.saveButton.move(770, 45)  # 820
 
     def sin(self):
         cursor = QtGui.QTextCursor(self.outputBox.document())
@@ -520,46 +547,6 @@ class MainWindow(QtWidgets.QWidget):
         cursor.insertText("tan()")
         cursor.endEditBlock()
 
-    def sqrt(self):
-        cursor = QtGui.QTextCursor(self.outputBox.document())
-        cursor.beginEditBlock()
-        cursor.movePosition(QtGui.QTextCursor.End, QtGui.QTextCursor.MoveAnchor)
-
-        self.lastPos = cursor.position()
-        self.firstPos = self.lastPos
-        cursor.insertText("sqrt()")
-        cursor.endEditBlock()
-
-    def ln(self):
-        cursor = QtGui.QTextCursor(self.outputBox.document())
-        cursor.beginEditBlock()
-        cursor.movePosition(QtGui.QTextCursor.End, QtGui.QTextCursor.MoveAnchor)
-
-        self.lastPos = cursor.position()
-        self.firstPos = self.lastPos
-        cursor.insertText("ln()")
-        cursor.endEditBlock()
-
-    def logx(self):
-        cursor = QtGui.QTextCursor(self.outputBox.document())
-        cursor.beginEditBlock()
-        cursor.movePosition(QtGui.QTextCursor.End, QtGui.QTextCursor.MoveAnchor)
-
-        self.lastPos = cursor.position()
-        self.firstPos = self.lastPos
-        cursor.insertText("logx()")
-        cursor.endEditBlock()
-
-    def log10(self):
-        cursor = QtGui.QTextCursor(self.outputBox.document())
-        cursor.beginEditBlock()
-        cursor.movePosition(QtGui.QTextCursor.End, QtGui.QTextCursor.MoveAnchor)
-
-        self.lastPos = cursor.position()
-        self.firstPos = self.lastPos
-        cursor.insertText("log10()")
-        cursor.endEditBlock()
-
     def pi(self):
         cursor = QtGui.QTextCursor(self.outputBox.document())
         cursor.beginEditBlock()
@@ -570,14 +557,14 @@ class MainWindow(QtWidgets.QWidget):
         cursor.insertText("3.141592653589793238")
         cursor.endEditBlock()
 
-    def exponent(self):
+    def factorial(self):
         cursor = QtGui.QTextCursor(self.outputBox.document())
         cursor.beginEditBlock()
         cursor.movePosition(QtGui.QTextCursor.End, QtGui.QTextCursor.MoveAnchor)
 
         self.lastPos = cursor.position()
         self.firstPos = self.lastPos
-        cursor.insertText("exponent()")
+        cursor.insertText("fact()")
         cursor.endEditBlock()
 
     def run_script(self):  # For running the main input script
@@ -609,6 +596,7 @@ class MainWindow(QtWidgets.QWidget):
             )  # moves cursor to end
             cursor2.insertText(">> " + line + "\n")
             try:
+                Interpreter(line).execute()
                 __tokens = Lexer(line).get_tokens()
 
                 if len(__tokens) > 1:
@@ -617,7 +605,39 @@ class MainWindow(QtWidgets.QWidget):
                         and __tokens[1].type == TokenType.ASSIGN
                     ):
 
-                        self.varDict[__tokens[0].value] = str(main_execute(line))
+                        cursor2.insertText(str(Interpreter(line).execute()) + "\n")
+
+                        if __tokens[0].value not in list(self.varDict.keys()):
+                            self.varDependencies[__tokens[0].value] = []
+                        else:
+                            print(__tokens[0].value)
+                            for i in self.varDependencies[__tokens[0].value]:
+                                print(i)
+                                print(Interpreter(self.varDec[i]).execute())
+                                self.varDict[i] = Interpreter(self.varDec[i]).execute()
+
+                        self.varDict[__tokens[0].value] = str(
+                            Interpreter(line).execute()
+                        )
+
+                        if __tokens[0].value in self.varDec.keys():
+                            for i in self.varDependencies:
+                                if __tokens[0].value in self.varDependencies[i]:
+                                    self.varDependencies[i].remove(__tokens[0].value)
+
+                        self.varDec[
+                            __tokens[0].value
+                        ] = line  # stores the assignment line of variable
+
+                        for i in range(len(__tokens[2:])):
+                            if TokenType.IDENTIFIER == __tokens[i + 2].type:
+                                if (
+                                    __tokens[0].value
+                                    not in self.varDependencies[__tokens[i + 2].value]
+                                ):
+                                    self.varDependencies[__tokens[i + 2].value].append(
+                                        __tokens[0].value
+                                    )
 
                         for i in range(len(self.varDict.keys())):
                             self.table.setItem(
@@ -636,10 +656,10 @@ class MainWindow(QtWidgets.QWidget):
                             )
 
                     else:
-                        cursor2.insertText(str(main_execute(line)) + "\n")
+                        cursor2.insertText(str(Interpreter(line).execute()) + "\n")
 
                 else:
-                    cursor2.insertText(str(main_execute(line)) + "\n")
+                    cursor2.insertText(str(Interpreter(line).execute()) + "\n")
 
             except:
                 cursor2.insertText(
@@ -691,10 +711,6 @@ class MainWindow(QtWidgets.QWidget):
                     self.outputBox.moveCursor(QtGui.QTextCursor.End)
 
             if event.key() == QtCore.Qt.Key_Return and self.outputBox.hasFocus():
-                # Testing - not finished - Key press enter event handling
-
-                # Need a way to see the line that was returned? So we can lex and parse?
-
                 self.savedHtmlText = self.outputBox.toHtml()
 
                 cursor = QtGui.QTextCursor(self.outputBox.document())
@@ -702,8 +718,6 @@ class MainWindow(QtWidgets.QWidget):
                 cursor.movePosition(QtGui.QTextCursor.End, QtGui.QTextCursor.MoveAnchor)
                 self.lastPos = cursor.position()
 
-                # ReGeX here - Implement this? Or maybe implement cursor.position() better? Look into this...
-                # Not super amused with implementation here...
                 line = (
                     self.outputBox.toPlainText()[self.firstPos : self.lastPos]
                     .replace(">>", "")
@@ -717,7 +731,8 @@ class MainWindow(QtWidgets.QWidget):
                     cursor.endEditBlock()
                 else:
                     try:
-                        execution = main_execute(line)
+                        execution = Interpreter(line).execute()
+                        cursor.insertText("\n" + str(execution))
 
                         __tokens = Lexer(line).get_tokens()
 
@@ -727,8 +742,47 @@ class MainWindow(QtWidgets.QWidget):
                                 and __tokens[1].type == TokenType.ASSIGN
                             ):
 
+                                # if not already in dictionary keys:
+                                if __tokens[0].value not in list(self.varDict.keys()):
+                                    self.varDependencies[__tokens[0].value] = []
+                                else:  # need to execute for dependencies
+                                    for i in self.varDependencies[__tokens[0].value]:
+                                        self.varDict[i] = Interpreter(
+                                            self.varDec[i]
+                                        ).execute()
+
                                 self.varDict[__tokens[0].value] = str(execution)
 
+                                if __tokens[0].value in self.varDec.keys():
+                                    for i in self.varDependencies:
+                                        if __tokens[0].value in self.varDependencies[i]:
+                                            self.varDependencies[i].remove(
+                                                __tokens[0].value
+                                            )
+
+                                self.varDec[
+                                    __tokens[0].value
+                                ] = line  # stores the assignment line of variable
+
+                                for i in range(len(__tokens[2:])):
+
+                                    # i+2 to not include the identifier at the start of assignment
+                                    if (
+                                        TokenType.IDENTIFIER == __tokens[i + 2].type
+                                    ):  # if there is another variable after assign
+                                        if (
+                                            __tokens[0].value
+                                            not in self.varDependencies[
+                                                __tokens[i + 2].value
+                                            ]
+                                        ):  # if not already in list
+                                            self.varDependencies[
+                                                __tokens[i + 2].value
+                                            ].append(
+                                                __tokens[0].value
+                                            )  # add to list for variables
+
+                                # Adding dictionary values to graphical table
                                 for i in range(len(self.varDict.keys())):
                                     self.table.setItem(
                                         i,
@@ -749,12 +803,6 @@ class MainWindow(QtWidgets.QWidget):
                                         ),
                                     )
 
-                            else:
-                                cursor.insertText("\n" + str(execution))
-
-                        else:
-                            cursor.insertText("\n" + str(execution))
-
                     except Exception as e:
                         cursor.insertText("\nERROR: " + str(e))
 
@@ -774,6 +822,8 @@ class Controller:
     inputBoxText = ""
     pos = 0
     varDict = {}
+    varDec = {}
+    varDependencies = {}
 
     def __init__(self):
         pass
@@ -792,11 +842,8 @@ class Controller:
                 re.search(r"^[a-zA-Z0-9]*$", self.saveWin.name.toPlainText()) == None
             ):  # if there is a space
                 self.saveWin.error.setVisible(True)
-            # else:
-            # self.saveWin.close()
         except:
             self.saveWin = None
-            # IN DEVELOPMENT
 
         try:
             self.loadWin.close()
@@ -813,6 +860,8 @@ class Controller:
             self.inputBoxText,
             self.pos,
             self.varDict,
+            self.varDec,
+            self.varDependencies,
             self.window,
             self.saveWin,
             self.loadWin,
@@ -848,6 +897,9 @@ class Controller:
         self.pos = self.main.firstPos
         self.varDict = self.main.varDict
 
+        self.varDependencies = self.main.varDependencies
+        self.varDec = self.main.varDec
+
         self.pinputWin.switch_window.connect(self.show_plot)
         self.pinputWin.show()
 
@@ -858,10 +910,12 @@ class Controller:
         self.pos = self.main.firstPos
         self.varDict = self.main.varDict
 
+        self.varDependencies = self.main.varDependencies
+        self.varDec = self.main.varDec
+
         try:
             self.pinputWin.error.setVisible(False)
             self.plotWin = PlotWindow(text)
-            self.pinputWin.close()
         except:
             self.pinputWin.error.setVisible(True)
 
@@ -872,6 +926,9 @@ class Controller:
         self.inputBoxText = self.main.scriptBox.toPlainText()
         self.pos = self.main.firstPos
         self.varDict = self.main.varDict
+
+        self.varDependencies = self.main.varDependencies
+        self.varDec = self.main.varDec
 
         self.window.switch_window.connect(self.show_main)
         self.window.show()
@@ -884,6 +941,9 @@ class Controller:
         self.pos = self.main.firstPos
         self.varDict = self.main.varDict
 
+        self.varDependencies = self.main.varDependencies
+        self.varDec = self.main.varDec
+
         self.saveWin.switch_window.connect(self.show_main)
         self.saveWin.show()
 
@@ -895,12 +955,16 @@ class Controller:
         self.pos = self.main.firstPos
         self.varDict = self.main.varDict
 
+        self.varDependencies = self.main.varDependencies
+        self.varDec = self.main.varDec
+
         self.loadWin.switch_window.connect(self.show_main)
         self.loadWin.show()
 
 
 def main():
     app = QtWidgets.QApplication(sys.argv)
+    app.setStyle("Fusion")
     controller = Controller()
     controller.show_main()
     sys.exit(app.exec_())

@@ -1,5 +1,5 @@
 """
-AUTHORS: Ebin, Aswin
+AUTHORS: Ebin Paul, Aswin Sasi
 DESCRIPTION: The following class is used to create an Abstract Syntax Tree (AST). The operators with higher precedence
             are the located lower in the tree mean while, operators with lower precedence are located higher in the tree.
             
@@ -16,9 +16,10 @@ REFERENCES: https://pages.cs.wisc.edu/~fischer/cs536.s06/course.hold/html/NOTES/
 """
 
 
+from core.lexer.lexicalAnalyzer import Lexer
 from core.lexer.token import Token, TokenType
 
-from .nodes import IdentifierNode, OperandNode, OperatorNode
+from .nodes import FunctionNode, IdentifierNode, OperandNode, OperatorNode
 
 """
 BNF :-
@@ -34,8 +35,8 @@ BNF :-
 
 
 class Parser:
-    def __init__(self, tokens: list):
-        self.__tokens = tokens
+    def __init__(self, input_string: str):
+        self.__tokens = Lexer(input_string).get_tokens()
         self.current_token: Token = None
         self.position = 0
         self.parenthesis_stack = []
@@ -65,12 +66,27 @@ class Parser:
 
     def factor(self):
         """
-        <factor> -> <number> |  (expression)
+        <factor> -> <builtin-function> | <number> |  (expression)
         """
         token = self.current_token
 
         if self.current_token.type == TokenType.END:
             return
+
+        # if the expression starts with one of the following tokens,
+        # then raise an exception
+        if self.current_token.type in (
+            TokenType.MULTIPLY,
+            TokenType.MODULO,
+            TokenType.DIVIDE,
+            TokenType.CARET,
+            TokenType.ASSIGN,
+            TokenType.GT,
+            TokenType.LT,
+            TokenType.NEQ,
+            TokenType.EQ,
+        ):
+            raise Exception("Invalid expression.")
 
         # set the left node as NULL/NONE is the current node encountered is a unary operator.
         elif self.current_token.type in (TokenType.PLUS, TokenType.MINUS):
@@ -91,6 +107,18 @@ class Parser:
             result = self.expression()
 
             self.next_token()
+            return result
+
+        elif token.type == TokenType.FUNC:
+            while (
+                self.current_token.type != TokenType.END
+                and self.current_token
+                and self.current_token.type == TokenType.FUNC
+            ):
+                function = self.current_token
+                self.next_token()
+                result = FunctionNode(function, self.factor())
+
             return result
 
     def power(self):
@@ -212,6 +240,7 @@ class Parser:
         """
         Parses the tokens list and returns an AST (Abstract Syntax Tree)
         """
+
         result = self.assignment()
 
         if self.parenthesis_stack:

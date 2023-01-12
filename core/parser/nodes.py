@@ -1,5 +1,5 @@
 """
-AUTHOR: Ebin, Aswin
+AUTHOR: Ebin Paul, Aswin Sasi
 DESCRIPTION: The following classes are nodes of Abstract Syntax Tree (AST). Each class has a get_node_value method which returns,
             the value of that particular node
             
@@ -11,7 +11,9 @@ REFERENCES: https://ruslanspivak.com/lsbasi-part7/
 
 from core.lexer.token import Token, TokenType
 
-SYMBOL_TABLE = {}
+from ..functions.functions import cos_function, factorial, sin_function
+
+SYMBOL_TABLE = {}  # where variables are stored
 
 
 class OperandNode:
@@ -46,6 +48,40 @@ class IdentifierNode:
 
     def __str__(self):
         return self.__value
+
+    def __repr__(self):
+        return self.__str__()
+
+
+class FunctionNode:
+    def __init__(self, token: Token, value):
+        self.token: Token = token
+        self.leaf_node: OperandNode or IdentifierNode = value
+
+    def get_node_value(self):
+        # return f"{self.token.value}({self.leaf_node})"
+        if self.token.value == "fact":
+            # return factorial(self.leaf_node.get_node_value())
+            # return self.leaf_node.get_node_value()
+            f_ans = factorial(self.leaf_node.get_node_value())
+            return f_ans
+
+        elif self.token.value == "sin":
+            s_ans = sin_function(self.leaf_node.get_node_value())
+            return s_ans
+
+        elif self.token.value == "cos":
+            c_ans = cos_function(self.leaf_node.get_node_value())
+            return c_ans
+
+        elif self.token.value == "tan":
+            t_ans = sin_function(self.leaf_node.get_node_value()) / cos_function(
+                self.leaf_node.get_node_value()
+            )
+            return round(t_ans, 3)
+
+    def __str__(self):
+        return f"{self.token.value}({self.leaf_node.get_node_value()})"
 
     def __repr__(self):
         return self.__str__()
