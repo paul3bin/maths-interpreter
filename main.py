@@ -99,7 +99,7 @@ class PlotWindow:
         ax.yaxis.set_ticks_position("left")
 
         if function[3] != '' and function[4] != '':
-            text_box = "Zero crossings = \n" + str(bisection_method(function[0], int(function[1]), int(function[2])))
+            text_box = "Zero crossings = \n" + str(bisection_method(function[0], int(function[3]), int(function[4])))
             props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
             ax.text(0.05, 0.95, text_box, transform=ax.transAxes, fontsize=10, verticalalignment='top', bbox=props)
 
