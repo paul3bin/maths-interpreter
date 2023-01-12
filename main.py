@@ -41,27 +41,24 @@ References: https://stackoverflow.com/questions/15263063/why-keypress-event-in-p
             https://matplotlib.org/3.3.4/gallery/recipes/placing_text_boxes.html
 """
 
-import re
-import sys
-from os import listdir
-
-import matplotlib.pyplot as plt
-import numpy as np
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtGui import QIcon, QPixmap
-from PyQt5.QtWidgets import (QApplication, QLabel, QMainWindow, QTableWidget,
-                             QVBoxLayout, QWidget)
-
+from zero_crossing import bisection_method
 from core.interpreter import Interpreter
 from core.lexer.lexicalAnalyzer import Lexer
 from core.lexer.token import TokenType
-
+from PyQt5 import QtWidgets, QtCore, QtGui
+from PyQt5.QtWidgets import QApplication, QLabel, QMainWindow, QTableWidget, QVBoxLayout, QWidget
+from PyQt5.QtGui import QPixmap, QIcon
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from os import listdir
+import sys
+import matplotlib.pyplot as plt
+import numpy as np
+import re
 
 class PlotWindow:
+
     def __init__(self, function):
-        print(function)
 
         function = function.split("|")
 
@@ -69,46 +66,27 @@ class PlotWindow:
         x = np.linspace(int(function[1]), int(function[2]), 100)  # 100 of these values
         y = np.zeros(100)  # y list of the same length
 
-        __tokens = Lexer(
-            function[0]
-        ).get_tokens()  # get the tokens of inputted function
+        __tokens = Lexer(function[0]).get_tokens()  # get the tokens of inputted function
 
         for i in range(len(x)):
             string_build = ""  # builds string that's read into interpreter
             for z in range(len(__tokens)):  # for every token in string
 
-                if (
-                    __tokens[z].type == TokenType.IDENTIFIER
-                ):  # if token is an identifier
+                if __tokens[z].type == TokenType.IDENTIFIER:  # if token is an identifier
 
                     if __tokens[z].value != "x":  # if identifier is 'x'
                         # replace with variable value
-                        string_build = (
-                            string_build
-                            + "("
-                            + str(Interpreter(__tokens[z].value).execute())
-                            + ")"
-                        )
+                        string_build = (string_build+"("+str(Interpreter(__tokens[z].value).execute())+")")
                     else:
-                        string_build = (
-                            string_build + "(" + str(x[i]) + ")"
-                        )  # replace value within 'x' list
+                        string_build = string_build + "(" + str(x[i]) + ")" # replace value within 'x' list
 
-                elif (
-                    __tokens[z].type == TokenType.INTEGER
-                    or __tokens[z].type == TokenType.FLOAT
-                ):
+                elif __tokens[z].type == TokenType.INTEGER or __tokens[z].type == TokenType.FLOAT:
                     # puts numbers in brackets to ensure BODMAS
                     string_build = string_build + "(" + str(__tokens[z].value) + ")"
                 else:  # if it's not any of the three aformentioned token types
-                    string_build = string_build + __tokens[z].value.replace(
-                        "'", ""
-                    )  # add to string
+                    string_build = string_build + __tokens[z].value.replace("'", "")  # add to string
 
-            # print(string_build)
-            y[i] = Interpreter(
-                string_build
-            ).execute()  # calculate and add to y at correct index
+            y[i] = Interpreter(string_build).execute()  # calculate and add to y at correct index
 
         # setting the axes at the centre
         fig = plt.figure()
@@ -120,17 +98,10 @@ class PlotWindow:
         ax.xaxis.set_ticks_position("bottom")
         ax.yaxis.set_ticks_position("left")
 
-        text_box = "Zero crossings = "
-        props = dict(boxstyle="round", facecolor="wheat", alpha=0.5)
-        ax.text(
-            0.05,
-            0.95,
-            text_box,
-            transform=ax.transAxes,
-            fontsize=14,
-            verticalalignment="top",
-            bbox=props,
-        )
+        if function[3] != '' and function[4] != '':
+            text_box = "Zero crossings = \n" + str(bisection_method(function[0], int(function[3]), int(function[4])))
+            props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
+            ax.text(0.05, 0.95, text_box, transform=ax.transAxes, fontsize=10, verticalalignment='top', bbox=props)
 
         # plot the function
         plt.plot(x, y, "r")
@@ -147,28 +118,27 @@ class PlotInputWindow(QtWidgets.QWidget):
 
     def __init__(self):
         QtWidgets.QWidget.__init__(self)
-        self.setGeometry(550, 370, 350, 165)  # Size of the window
-        self.setFixedSize(350, 165)
+        self.setGeometry(550, 370, 350, 210)  # Size of the window
+        self.setFixedSize(350, 210)
 
         title = QLabel(self)
         pixmap = QPixmap("./ui/images/plot1.jpg")
-        title.setPixmap(
-            pixmap.scaled(90, 90, aspectRatioMode=QtCore.Qt.KeepAspectRatio)
-        )
+        title.setPixmap(pixmap.scaled(90, 90, aspectRatioMode=QtCore.Qt.KeepAspectRatio))
         title.move(123, 14)
 
         assignments = QLabel(self)
         pixmap = QPixmap("./ui/images/plot2.jpg")
-        assignments.setPixmap(
-            pixmap.scaled(70, 70, aspectRatioMode=QtCore.Qt.KeepAspectRatio)
-        )
+        assignments.setPixmap(pixmap.scaled(70, 70, aspectRatioMode=QtCore.Qt.KeepAspectRatio))
         assignments.move(43, 50)
+
+        assignments = QLabel(self)
+        pixmap = QPixmap("./ui/images/zcinterval.jpg")
+        assignments.setPixmap(pixmap.scaled(90, 90, aspectRatioMode=QtCore.Qt.KeepAspectRatio))
+        assignments.move(23, 125)
 
         to_label = QLabel(self)
         pixmap = QPixmap("./ui/images/plot4.jpg")
-        to_label.setPixmap(
-            pixmap.scaled(16, 16, aspectRatioMode=QtCore.Qt.KeepAspectRatio)
-        )
+        to_label.setPixmap(pixmap.scaled(16, 16, aspectRatioMode=QtCore.Qt.KeepAspectRatio))
         to_label.move(151, 85)
 
         self.inputBox = QtWidgets.QTextEdit(self)
@@ -183,27 +153,33 @@ class PlotInputWindow(QtWidgets.QWidget):
         self.inputBox_right.move(170, 75)
         self.inputBox_right.resize(30, 30)
 
+        self.inputBox_left2 = QtWidgets.QTextEdit(self)
+        self.inputBox_left2.move(120, 115)
+        self.inputBox_left2.resize(30, 30)
+
+        to_label = QLabel(self)
+        pixmap = QPixmap("./ui/images/plot4.jpg")
+        to_label.setPixmap(pixmap.scaled(16, 16, aspectRatioMode=QtCore.Qt.KeepAspectRatio))
+        to_label.move(151, 123)
+
+        self.inputBox_right2 = QtWidgets.QTextEdit(self)
+        self.inputBox_right2.move(170, 115)
+        self.inputBox_right2.resize(30, 30)
+
         b1 = QtWidgets.QPushButton(self)
         b1.setText("Submit")
         b1.clicked.connect(self.switch)
-        b1.move(125, 110)
+        b1.move(125, 155)
 
         self.error = QLabel(self)
         pixmap = QPixmap("./ui/images/plot3.jpg")
-        self.error.setPixmap(
-            pixmap.scaled(130, 130, aspectRatioMode=QtCore.Qt.KeepAspectRatio)
-        )
-        self.error.move(100, 140)
+        self.error.setPixmap(pixmap.scaled(130, 130, aspectRatioMode=QtCore.Qt.KeepAspectRatio))
+        self.error.move(100, 185)
         self.error.setVisible(False)  # Initially set as False, unless error occurs
 
     def switch(self):
-        self.switch_window.emit(
-            self.inputBox.toPlainText()
-            + "|"
-            + self.inputBox_left.toPlainText()
-            + "|"
-            + self.inputBox_right.toPlainText()
-        )
+        self.switch_window.emit(self.inputBox.toPlainText()+"|"+self.inputBox_left.toPlainText()+"|"+self.inputBox_right.toPlainText()
+                                +"|"+self.inputBox_left2.toPlainText()+"|"+self.inputBox_right2.toPlainText())
 
 
 class SaveWindow(QtWidgets.QWidget):
@@ -216,9 +192,7 @@ class SaveWindow(QtWidgets.QWidget):
 
         name_label = QLabel(self)
         pixmap = QPixmap("./ui/images/save1.jpg")
-        name_label.setPixmap(
-            pixmap.scaled(110, 110, aspectRatioMode=QtCore.Qt.KeepAspectRatio)
-        )
+        name_label.setPixmap(pixmap.scaled(110, 110, aspectRatioMode=QtCore.Qt.KeepAspectRatio))
         name_label.move(113, 13)
 
         self.name = QtWidgets.QTextEdit(self)
@@ -232,16 +206,12 @@ class SaveWindow(QtWidgets.QWidget):
 
         self.error = QLabel(self)
         pixmap = QPixmap("./ui/images/save2.jpg")
-        self.error.setPixmap(
-            pixmap.scaled(190, 190, aspectRatioMode=QtCore.Qt.KeepAspectRatio)
-        )
+        self.error.setPixmap(pixmap.scaled(190, 190, aspectRatioMode=QtCore.Qt.KeepAspectRatio))
         self.error.move(70, 110)
         self.error.setVisible(False)  # Initially set as False, unless error occurs
 
     def switch(self):
-        if (
-            re.search(r"^[a-zA-Z0-9]*$", self.name.toPlainText()) == None
-        ):  # if there is a space
+        if re.search(r"^[a-zA-Z0-9]*$", self.name.toPlainText()) == None:  # if there is a space
             self.error.setVisible(True)
         else:
             self.switch_window.emit(self.name.toPlainText() + ".txt")
@@ -257,9 +227,7 @@ class LoadWindow(QtWidgets.QWidget):
 
         name_label = QLabel(self)
         pixmap = QPixmap("./ui/images/load1.jpg")
-        name_label.setPixmap(
-            pixmap.scaled(110, 110, aspectRatioMode=QtCore.Qt.KeepAspectRatio)
-        )
+        name_label.setPixmap(pixmap.scaled(110, 110, aspectRatioMode=QtCore.Qt.KeepAspectRatio))
         name_label.move(113, 13)
 
         self.comboBox = QtWidgets.QComboBox(self)
@@ -277,9 +245,7 @@ class LoadWindow(QtWidgets.QWidget):
 
         self.error = QLabel(self)
         pixmap = QPixmap("./ui/images/load2.jpg")
-        self.error.setPixmap(
-            pixmap.scaled(190, 190, aspectRatioMode=QtCore.Qt.KeepAspectRatio)
-        )
+        self.error.setPixmap(pixmap.scaled(190, 190, aspectRatioMode=QtCore.Qt.KeepAspectRatio))
         self.error.move(70, 110)
         self.error.setVisible(False)  # Initially set as False, unless error occurs
 
@@ -301,16 +267,12 @@ class VariableWindow(QtWidgets.QWidget):
 
         name_label = QLabel(self)
         pixmap = QPixmap("./ui/images/var1.jpg")
-        name_label.setPixmap(
-            pixmap.scaled(190, 190, aspectRatioMode=QtCore.Qt.KeepAspectRatio)
-        )
+        name_label.setPixmap(pixmap.scaled(190, 190, aspectRatioMode=QtCore.Qt.KeepAspectRatio))
         name_label.move(83, 13)
 
         assignments = QLabel(self)
         pixmap = QPixmap("./ui/images/var2.jpg")
-        assignments.setPixmap(
-            pixmap.scaled(115, 115, aspectRatioMode=QtCore.Qt.KeepAspectRatio)
-        )
+        assignments.setPixmap(pixmap.scaled(115, 115, aspectRatioMode=QtCore.Qt.KeepAspectRatio))
         assignments.move(5, 52)
 
         self.input1 = QtWidgets.QLineEdit(self)
@@ -330,9 +292,7 @@ class VariableWindow(QtWidgets.QWidget):
 
         self.error = QLabel(self)
         pixmap = QPixmap("./ui/images/var3.jpg")
-        self.error.setPixmap(
-            pixmap.scaled(160, 160, aspectRatioMode=QtCore.Qt.KeepAspectRatio)
-        )
+        self.error.setPixmap(pixmap.scaled(160, 160, aspectRatioMode=QtCore.Qt.KeepAspectRatio))
         self.error.move(80, 160)
         self.error.setVisible(False)  # Initially set as False, unless error occurs
 
@@ -352,19 +312,7 @@ class MainWindow(QtWidgets.QWidget):
     switch_window3 = QtCore.pyqtSignal()
     switch_window4 = QtCore.pyqtSignal()
 
-    def __init__(
-        self,
-        text,
-        outputText,
-        scriptText,
-        pos,
-        varHold,
-        varDec,
-        varDep,
-        var,
-        save,
-        load,
-    ):
+    def __init__(self, text, outputText, scriptText, pos, varHold, varDec, varDep, var, save, load):
         QtWidgets.QWidget.__init__(self)
         self.setGeometry(100, 100, 1250, 700)
         self.setFixedSize(1250, 700)
@@ -375,15 +323,11 @@ class MainWindow(QtWidgets.QWidget):
         self.varDependencies = varDep
 
         self.varDict = varHold  # dictionary to hold the variables
-        self.linePos = (
-            -1
-        )  # Should be -1 (unless loading after sub-window - need to do more)
+        self.linePos = -1  # Should be -1 (unless loading after sub-window - need to do more)
 
         name = QLabel(self)
         pixmap = QPixmap("./ui/images/mctext.jpg")
-        name.setPixmap(
-            pixmap.scaled(300, 300, aspectRatioMode=QtCore.Qt.KeepAspectRatio)
-        )
+        name.setPixmap(pixmap.scaled(300, 300, aspectRatioMode=QtCore.Qt.KeepAspectRatio))
         name.move(80, 0)
 
         # Label at the top of application
@@ -451,9 +395,7 @@ class MainWindow(QtWidgets.QWidget):
         self.table.setColumnWidth(1, 153)
         self.table.resize(347, 447)
         self.table.move(877, 70)
-        self.table.setEditTriggers(
-            QtWidgets.QTableWidget.NoEditTriggers
-        )  # user can't edit variable table
+        self.table.setEditTriggers(QtWidgets.QTableWidget.NoEditTriggers)  # user can't edit variable table
 
         # Buttons
         self.runButton = QtWidgets.QPushButton(self)
@@ -569,21 +511,15 @@ class MainWindow(QtWidgets.QWidget):
 
     def run_script(self):  # For running the main input script
         cursor = self.scriptBox.textCursor()  # Cursor of the input box
-        cursor2 = QtGui.QTextCursor(
-            self.outputBox.document()
-        )  # Cursor of the output box
+        cursor2 = QtGui.QTextCursor(self.outputBox.document())  # Cursor of the output box
 
         if cursor.hasSelection():  # If text is highlighted
             # Output highlighted text on the command line
-            selected = self.scriptBox.toPlainText()[
-                cursor.selectionStart() : cursor.selectionEnd()
-            ].strip()
+            selected = self.scriptBox.toPlainText()[cursor.selectionStart() : cursor.selectionEnd()].strip()
             script_type = "Running partial script...\n"
 
         else:
-            selected = (
-                self.scriptBox.toPlainText().strip()
-            )  # Output whole script on command line
+            selected = self.scriptBox.toPlainText().strip()  # Output whole script on command line
             script_type = "Running script...\n"
 
         cursor2.beginEditBlock()
@@ -591,19 +527,14 @@ class MainWindow(QtWidgets.QWidget):
         cursor2.insertText(script_type)  # Output that the whole script is running
 
         for line in selected.splitlines():
-            cursor2.movePosition(
-                QtGui.QTextCursor.End, QtGui.QTextCursor.MoveAnchor
-            )  # moves cursor to end
+            cursor2.movePosition(QtGui.QTextCursor.End, QtGui.QTextCursor.MoveAnchor)  # moves cursor to end
             cursor2.insertText(">> " + line + "\n")
             try:
                 Interpreter(line).execute()
                 __tokens = Lexer(line).get_tokens()
 
                 if len(__tokens) > 1:
-                    if (
-                        __tokens[0].type == TokenType.IDENTIFIER
-                        and __tokens[1].type == TokenType.ASSIGN
-                    ):
+                    if (__tokens[0].type == TokenType.IDENTIFIER and __tokens[1].type == TokenType.ASSIGN):
 
                         cursor2.insertText(str(Interpreter(line).execute()) + "\n")
 
@@ -616,44 +547,23 @@ class MainWindow(QtWidgets.QWidget):
                                 print(Interpreter(self.varDec[i]).execute())
                                 self.varDict[i] = Interpreter(self.varDec[i]).execute()
 
-                        self.varDict[__tokens[0].value] = str(
-                            Interpreter(line).execute()
-                        )
+                        self.varDict[__tokens[0].value] = str(Interpreter(line).execute())
 
                         if __tokens[0].value in self.varDec.keys():
                             for i in self.varDependencies:
                                 if __tokens[0].value in self.varDependencies[i]:
                                     self.varDependencies[i].remove(__tokens[0].value)
 
-                        self.varDec[
-                            __tokens[0].value
-                        ] = line  # stores the assignment line of variable
+                        self.varDec[__tokens[0].value] = line  # stores the assignment line of variable
 
                         for i in range(len(__tokens[2:])):
                             if TokenType.IDENTIFIER == __tokens[i + 2].type:
-                                if (
-                                    __tokens[0].value
-                                    not in self.varDependencies[__tokens[i + 2].value]
-                                ):
-                                    self.varDependencies[__tokens[i + 2].value].append(
-                                        __tokens[0].value
-                                    )
+                                if __tokens[0].value not in self.varDependencies[__tokens[i+2].value]:
+                                    self.varDependencies[__tokens[i + 2].value].append(__tokens[0].value)
 
                         for i in range(len(self.varDict.keys())):
-                            self.table.setItem(
-                                i,
-                                0,
-                                QtWidgets.QTableWidgetItem(
-                                    list(self.varDict.keys())[i]
-                                ),
-                            )
-                            self.table.setItem(
-                                i,
-                                1,
-                                QtWidgets.QTableWidgetItem(
-                                    str(self.varDict.get(list(self.varDict.keys())[i]))
-                                ),
-                            )
+                            self.table.setItem(i,0,QtWidgets.QTableWidgetItem(list(self.varDict.keys())[i]))
+                            self.table.setItem(i,1,QtWidgets.QTableWidgetItem(str(self.varDict.get(list(self.varDict.keys())[i]))))
 
                     else:
                         cursor2.insertText(str(Interpreter(line).execute()) + "\n")
@@ -662,23 +572,15 @@ class MainWindow(QtWidgets.QWidget):
                     cursor2.insertText(str(Interpreter(line).execute()) + "\n")
 
             except:
-                cursor2.insertText(
-                    "ERROR: Issue at line "
-                    + str(selected.splitlines().index(line) + 1)
-                    + "\n"
-                )
+                cursor2.insertText("ERROR: Issue at line " + str(selected.splitlines().index(line) + 1) + "\n")
                 break
 
         cursor2.insertText(">> ")
-        self.firstPos = (
-            cursor2.position()
-        )  # records first position of cursor line (for string output)
+        self.firstPos = cursor2.position()  # records first position of cursor line (for string output)
         cursor2.endEditBlock()
 
         self.savedPlainText = self.outputBox.toPlainText()  # Save the plain text
-        self.savedHtmlText = (
-            self.outputBox.toHtml()
-        )  # Save the HTML (i.e. if text bolded, coloured etc)
+        self.savedHtmlText = self.outputBox.toHtml()  # Save the HTML (i.e. if text bolded, coloured etc)
 
     def variable(self):
         self.switch_window.emit()
@@ -701,9 +603,7 @@ class MainWindow(QtWidgets.QWidget):
                 if self.savedPlainText.strip() == self.outputBox.toPlainText().strip():
                     cursor = QtGui.QTextCursor(self.outputBox.document())
                     cursor.beginEditBlock()
-                    cursor.movePosition(
-                        QtGui.QTextCursor.End, QtGui.QTextCursor.MoveAnchor
-                    )
+                    cursor.movePosition(QtGui.QTextCursor.End, QtGui.QTextCursor.MoveAnchor)
                     cursor.insertText("\n>> ")
                     cursor.endEditBlock()
 
@@ -737,71 +637,35 @@ class MainWindow(QtWidgets.QWidget):
                         __tokens = Lexer(line).get_tokens()
 
                         if len(__tokens) > 1:
-                            if (
-                                __tokens[0].type == TokenType.IDENTIFIER
-                                and __tokens[1].type == TokenType.ASSIGN
-                            ):
+                            if (__tokens[0].type == TokenType.IDENTIFIER and __tokens[1].type == TokenType.ASSIGN):
 
                                 # if not already in dictionary keys:
                                 if __tokens[0].value not in list(self.varDict.keys()):
                                     self.varDependencies[__tokens[0].value] = []
                                 else:  # need to execute for dependencies
                                     for i in self.varDependencies[__tokens[0].value]:
-                                        self.varDict[i] = Interpreter(
-                                            self.varDec[i]
-                                        ).execute()
+                                        self.varDict[i] = Interpreter(self.varDec[i]).execute()
 
                                 self.varDict[__tokens[0].value] = str(execution)
 
                                 if __tokens[0].value in self.varDec.keys():
                                     for i in self.varDependencies:
                                         if __tokens[0].value in self.varDependencies[i]:
-                                            self.varDependencies[i].remove(
-                                                __tokens[0].value
-                                            )
+                                            self.varDependencies[i].remove(__tokens[0].value)
 
-                                self.varDec[
-                                    __tokens[0].value
-                                ] = line  # stores the assignment line of variable
+                                self.varDec[__tokens[0].value] = line  # stores the assignment line of variable
 
                                 for i in range(len(__tokens[2:])):
 
                                     # i+2 to not include the identifier at the start of assignment
-                                    if (
-                                        TokenType.IDENTIFIER == __tokens[i + 2].type
-                                    ):  # if there is another variable after assign
-                                        if (
-                                            __tokens[0].value
-                                            not in self.varDependencies[
-                                                __tokens[i + 2].value
-                                            ]
-                                        ):  # if not already in list
-                                            self.varDependencies[
-                                                __tokens[i + 2].value
-                                            ].append(
-                                                __tokens[0].value
-                                            )  # add to list for variables
+                                    if TokenType.IDENTIFIER == __tokens[i+2].type:  # if there is another variable after assign
+                                        if __tokens[0].value not in self.varDependencies[__tokens[i+2].value]:  # if not already in list
+                                            self.varDependencies[__tokens[i+2].value].append(__tokens[0].value)  # add to list for variables
 
                                 # Adding dictionary values to graphical table
                                 for i in range(len(self.varDict.keys())):
-                                    self.table.setItem(
-                                        i,
-                                        0,
-                                        QtWidgets.QTableWidgetItem(
-                                            list(self.varDict.keys())[i]
-                                        ),
-                                    )
-                                    self.table.setItem(
-                                        i,
-                                        1,
-                                        QtWidgets.QTableWidgetItem(
-                                            str(
-                                                self.varDict.get(
-                                                    list(self.varDict.keys())[i]
-                                                )
-                                            )
-                                        ),
-                                    )
+                                    self.table.setItem(i,0,QtWidgets.QTableWidgetItem(list(self.varDict.keys())[i]))
+                                    self.table.setItem(i,1,QtWidgets.QTableWidgetItem(str(self.varDict.get(list(self.varDict.keys())[i]))))
 
                     except Exception as e:
                         cursor.insertText("\nERROR: " + str(e))
@@ -837,10 +701,7 @@ class Controller:
             self.window = None
 
         try:
-            # IN DEVELOPMENT
-            if (
-                re.search(r"^[a-zA-Z0-9]*$", self.saveWin.name.toPlainText()) == None
-            ):  # if there is a space
+            if (re.search(r"^[a-zA-Z0-9]*$", self.saveWin.name.toPlainText()) == None):  # if there is a space
                 self.saveWin.error.setVisible(True)
         except:
             self.saveWin = None
@@ -854,33 +715,14 @@ class Controller:
             self.outputBoxText = self.main.savedPlainText
             text = self.outputBoxText + text
 
-        self.main = MainWindow(
-            text,
-            self.outputBoxText,
-            self.inputBoxText,
-            self.pos,
-            self.varDict,
-            self.varDec,
-            self.varDependencies,
-            self.window,
-            self.saveWin,
-            self.loadWin,
-        )
+        self.main = MainWindow(text,self.outputBoxText,self.inputBoxText,self.pos,self.varDict, self.varDec, self.varDependencies, self.window,self.saveWin,self.loadWin)
         self.window = None
         self.saveWin = None
         self.loadWin = None
 
         for i in range(len(self.varDict.keys())):
-            self.main.table.setItem(
-                i, 0, QtWidgets.QTableWidgetItem(list(self.varDict.keys())[i])
-            )
-            self.main.table.setItem(
-                i,
-                1,
-                QtWidgets.QTableWidgetItem(
-                    str(self.varDict.get(list(self.varDict.keys())[i]))
-                ),
-            )
+            self.main.table.setItem(i, 0, QtWidgets.QTableWidgetItem(list(self.varDict.keys())[i]))
+            self.main.table.setItem(i,1,QtWidgets.QTableWidgetItem(str(self.varDict.get(list(self.varDict.keys())[i]))))
 
         self.main.switch_window.connect(self.show_var)
         self.main.switch_window2.connect(self.show_save)
@@ -964,7 +806,7 @@ class Controller:
 
 def main():
     app = QtWidgets.QApplication(sys.argv)
-    app.setStyle("Fusion")
+    app.setStyle('Fusion')
     controller = Controller()
     controller.show_main()
     sys.exit(app.exec_())
