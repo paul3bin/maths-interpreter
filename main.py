@@ -41,27 +41,31 @@ References: https://stackoverflow.com/questions/15263063/why-keypress-event-in-p
             https://matplotlib.org/3.3.4/gallery/recipes/placing_text_boxes.html
 """
 
-import re
-import sys
-from os import listdir
-
-import matplotlib.pyplot as plt
-import numpy as np
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtGui import QIcon, QPixmap
-from PyQt5.QtWidgets import (QApplication, QLabel, QMainWindow, QTableWidget,
-                             QVBoxLayout, QWidget)
-
+from zero_crossing import bisection_method
 from core.interpreter import Interpreter
 from core.lexer.lexicalAnalyzer import Lexer
 from core.lexer.token import TokenType
+from PyQt5 import QtWidgets, QtCore, QtGui
+from PyQt5.QtWidgets import (
+    QApplication,
+    QLabel,
+    QMainWindow,
+    QTableWidget,
+    QVBoxLayout,
+    QWidget,
+)
+from PyQt5.QtGui import QPixmap, QIcon
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from os import listdir
+import sys
+import matplotlib.pyplot as plt
+import numpy as np
+import re
 
 
 class PlotWindow:
     def __init__(self, function):
-        print(function)
 
         function = function.split("|")
 
@@ -105,7 +109,6 @@ class PlotWindow:
                         "'", ""
                     )  # add to string
 
-            # print(string_build)
             y[i] = Interpreter(
                 string_build
             ).execute()  # calculate and add to y at correct index
@@ -120,17 +123,20 @@ class PlotWindow:
         ax.xaxis.set_ticks_position("bottom")
         ax.yaxis.set_ticks_position("left")
 
-        text_box = "Zero crossings = "
-        props = dict(boxstyle="round", facecolor="wheat", alpha=0.5)
-        ax.text(
-            0.05,
-            0.95,
-            text_box,
-            transform=ax.transAxes,
-            fontsize=14,
-            verticalalignment="top",
-            bbox=props,
-        )
+        if function[3] != "" and function[4] != "":
+            text_box = "Zero crossings = \n" + str(
+                bisection_method(function[0], int(function[3]), int(function[4]))
+            )
+            props = dict(boxstyle="round", facecolor="wheat", alpha=0.5)
+            ax.text(
+                0.05,
+                0.95,
+                text_box,
+                transform=ax.transAxes,
+                fontsize=10,
+                verticalalignment="top",
+                bbox=props,
+            )
 
         # plot the function
         plt.plot(x, y, "r")
@@ -147,8 +153,8 @@ class PlotInputWindow(QtWidgets.QWidget):
 
     def __init__(self):
         QtWidgets.QWidget.__init__(self)
-        self.setGeometry(550, 370, 350, 165)  # Size of the window
-        self.setFixedSize(350, 165)
+        self.setGeometry(550, 370, 350, 210)  # Size of the window
+        self.setFixedSize(350, 210)
 
         title = QLabel(self)
         pixmap = QPixmap("./ui/images/plot1.jpg")
@@ -163,6 +169,13 @@ class PlotInputWindow(QtWidgets.QWidget):
             pixmap.scaled(70, 70, aspectRatioMode=QtCore.Qt.KeepAspectRatio)
         )
         assignments.move(43, 50)
+
+        assignments = QLabel(self)
+        pixmap = QPixmap("./ui/images/zcinterval.jpg")
+        assignments.setPixmap(
+            pixmap.scaled(90, 90, aspectRatioMode=QtCore.Qt.KeepAspectRatio)
+        )
+        assignments.move(23, 125)
 
         to_label = QLabel(self)
         pixmap = QPixmap("./ui/images/plot4.jpg")
@@ -183,17 +196,32 @@ class PlotInputWindow(QtWidgets.QWidget):
         self.inputBox_right.move(170, 75)
         self.inputBox_right.resize(30, 30)
 
+        self.inputBox_left2 = QtWidgets.QTextEdit(self)
+        self.inputBox_left2.move(120, 115)
+        self.inputBox_left2.resize(30, 30)
+
+        to_label = QLabel(self)
+        pixmap = QPixmap("./ui/images/plot4.jpg")
+        to_label.setPixmap(
+            pixmap.scaled(16, 16, aspectRatioMode=QtCore.Qt.KeepAspectRatio)
+        )
+        to_label.move(151, 123)
+
+        self.inputBox_right2 = QtWidgets.QTextEdit(self)
+        self.inputBox_right2.move(170, 115)
+        self.inputBox_right2.resize(30, 30)
+
         b1 = QtWidgets.QPushButton(self)
         b1.setText("Submit")
         b1.clicked.connect(self.switch)
-        b1.move(125, 110)
+        b1.move(125, 155)
 
         self.error = QLabel(self)
         pixmap = QPixmap("./ui/images/plot3.jpg")
         self.error.setPixmap(
             pixmap.scaled(130, 130, aspectRatioMode=QtCore.Qt.KeepAspectRatio)
         )
-        self.error.move(100, 140)
+        self.error.move(100, 185)
         self.error.setVisible(False)  # Initially set as False, unless error occurs
 
     def switch(self):
@@ -203,6 +231,10 @@ class PlotInputWindow(QtWidgets.QWidget):
             + self.inputBox_left.toPlainText()
             + "|"
             + self.inputBox_right.toPlainText()
+            + "|"
+            + self.inputBox_left2.toPlainText()
+            + "|"
+            + self.inputBox_right2.toPlainText()
         )
 
 
@@ -500,8 +532,8 @@ class MainWindow(QtWidgets.QWidget):
         self.sqrtButton.move(1145, 632)
 
         self.lnButton = QtWidgets.QPushButton(self)
-        self.lnButton.setText("π")
-        self.lnButton.clicked.connect(self.pi)  # connected to a function
+        self.lnButton.setText("root")
+        self.lnButton.clicked.connect(self.root)  # connected to a function
         self.lnButton.resize(40, 41)
         self.lnButton.move(1184, 632)
 
@@ -547,14 +579,14 @@ class MainWindow(QtWidgets.QWidget):
         cursor.insertText("tan()")
         cursor.endEditBlock()
 
-    def pi(self):
+    def root(self):
         cursor = QtGui.QTextCursor(self.outputBox.document())
         cursor.beginEditBlock()
         cursor.movePosition(QtGui.QTextCursor.End, QtGui.QTextCursor.MoveAnchor)
 
         self.lastPos = cursor.position()
         self.firstPos = self.lastPos
-        cursor.insertText("3.141592653589793238")
+        cursor.insertText("root()")
         cursor.endEditBlock()
 
     def factorial(self):
@@ -837,7 +869,6 @@ class Controller:
             self.window = None
 
         try:
-            # IN DEVELOPMENT
             if (
                 re.search(r"^[a-zA-Z0-9]*$", self.saveWin.name.toPlainText()) == None
             ):  # if there is a space

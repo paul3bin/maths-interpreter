@@ -79,6 +79,10 @@ class FunctionNode:
                 self.leaf_node.get_node_value()
             )
             return round(t_ans, 3)
+        
+        elif self.token.value == "root":
+            r_ans = self.leaf_node.get_node_value() ** 0.5
+            return round(r_ans, 4)
 
     def __str__(self):
         return f"{self.token.value}({self.leaf_node.get_node_value()})"
