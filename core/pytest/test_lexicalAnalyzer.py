@@ -1,6 +1,8 @@
 
-from core import main_execute
 import pytest
+
+from core import main_execute
+
 
 @pytest.mark.parametrize("test_input,expected",[("1+2",3),("5*10",50),("1 - 5 - 10",-14),("-0.02",-0.02),
 ("12+(5*3.3)",28.5),("500 + 2 * 5 / 4 - 8",494.5),("950 / (5*2) - 10",85),("10 + (5+2) * (5*3) - (9-2) / (1/2)",101),

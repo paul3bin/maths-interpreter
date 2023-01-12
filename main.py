@@ -41,27 +41,23 @@ References: https://stackoverflow.com/questions/15263063/why-keypress-event-in-p
             https://matplotlib.org/3.3.4/gallery/recipes/placing_text_boxes.html
 """
 
-from zero_crossing import bisection_method
+import re
+import sys
+from os import listdir
+
+import matplotlib.pyplot as plt
+import numpy as np
+from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtGui import QIcon, QPixmap
+from PyQt5.QtWidgets import (QApplication, QLabel, QMainWindow, QTableWidget,
+                             QVBoxLayout, QWidget)
+
 from core.interpreter import Interpreter
 from core.lexer.lexicalAnalyzer import Lexer
 from core.lexer.token import TokenType
-from PyQt5 import QtWidgets, QtCore, QtGui
-from PyQt5.QtWidgets import (
-    QApplication,
-    QLabel,
-    QMainWindow,
-    QTableWidget,
-    QVBoxLayout,
-    QWidget,
-)
-from PyQt5.QtGui import QPixmap, QIcon
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from os import listdir
-import sys
-import matplotlib.pyplot as plt
-import numpy as np
-import re
+from zero_crossing import bisection_method
 
 
 class PlotWindow:
