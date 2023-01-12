@@ -131,6 +131,11 @@ class PlotInputWindow(QtWidgets.QWidget):
         assignments.setPixmap(pixmap.scaled(70, 70, aspectRatioMode=QtCore.Qt.KeepAspectRatio))
         assignments.move(43, 50)
 
+        assignments = QLabel(self)
+        pixmap = QPixmap("./ui/images/zcinterval.jpg")
+        assignments.setPixmap(pixmap.scaled(90, 90, aspectRatioMode=QtCore.Qt.KeepAspectRatio))
+        assignments.move(23, 125)
+
         to_label = QLabel(self)
         pixmap = QPixmap("./ui/images/plot4.jpg")
         to_label.setPixmap(pixmap.scaled(16, 16, aspectRatioMode=QtCore.Qt.KeepAspectRatio))
