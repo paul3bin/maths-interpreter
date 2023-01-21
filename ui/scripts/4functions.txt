@@ -1,0 +1,17 @@
+sin(90)
+cos(0)
+tan(45)
+fact(21)
+1/sin(45)
+1/tan(56)
+1/cos(180)
+cos(10)
+
+var2 = sin(78)
+var1= sin(var1) + cos(var1)
+var2 = sin(cos(var1))
+
+root(100)
+root(sin(5))
+var1 = root(100)
+
