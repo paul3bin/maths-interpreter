@@ -12,10 +12,10 @@ which is processed by lexer, parser and executional pass.
 
 ## Authors
 
-- [@Aswin](https://github.com/Aswin1121998)
-- [@Christopher](https://github.com/cgaveyuea)
 - [@Ebin](https://www.github.com/paul3bin)
 - [@Max](https://github.com/cst19hgu)
+- [@Christopher](https://github.com/cgaveyuea)
+- [@Aswin](https://github.com/Aswin1121998)
 - [@Soniya](https://github.com/Soniyap151)
 
 ## Run Locally
