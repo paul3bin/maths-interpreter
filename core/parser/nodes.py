@@ -9,9 +9,8 @@ REFERENCES: https://ruslanspivak.com/lsbasi-part7/
             https://dev.to/j0nimost/making-a-math-interpreter-parser-52j8
 """
 
+from core.functions.functions import cos_function, factorial, sin_function
 from core.lexer.token import Token, TokenType
-
-from ..functions.functions import cos_function, factorial, sin_function
 
 SYMBOL_TABLE = {}  # where variables are stored
 
@@ -79,7 +78,7 @@ class FunctionNode:
                 self.leaf_node.get_node_value()
             )
             return round(t_ans, 3)
-        
+
         elif self.token.value == "root":
             r_ans = self.leaf_node.get_node_value() ** 0.5
             return round(r_ans, 4)

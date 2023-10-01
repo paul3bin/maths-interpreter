@@ -3,7 +3,7 @@ AUTHOR: Ebin Paul
 
 """
 
-from .parser.syntaxAnalyzer import Parser
+from core.parser.syntaxAnalyzer import Parser
 
 
 class Interpreter:

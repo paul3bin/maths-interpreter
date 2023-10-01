@@ -18,8 +18,8 @@ REFERENCES: https://pages.cs.wisc.edu/~fischer/cs536.s06/course.hold/html/NOTES/
 
 from core.lexer.lexicalAnalyzer import Lexer
 from core.lexer.token import Token, TokenType
-
-from .nodes import FunctionNode, IdentifierNode, OperandNode, OperatorNode
+from core.parser.nodes import (FunctionNode, IdentifierNode, OperandNode,
+                               OperatorNode)
 
 """
 BNF :-
@@ -48,7 +48,6 @@ class Parser:
         """
         try:
             if self.position < len(self.__tokens):
-
                 self.current_token = self.__tokens[self.position]
                 self.position += 1
 
@@ -135,7 +134,6 @@ class Parser:
             and self.current_token
             and self.current_token.type == TokenType.CARET
         ):
-
             operator = self.current_token
             self.next_token()
 

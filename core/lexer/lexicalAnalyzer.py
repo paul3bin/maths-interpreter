@@ -9,7 +9,7 @@ REFERENCES: https://ruslanspivak.com/lsbasi-part7/
 
 from string import ascii_lowercase, ascii_uppercase, digits
 
-from .token import Token, TokenType
+from core.lexer.token import Token, TokenType
 
 WHITESPACE = " \n\t"
 ALLOWED_IDENTIFIERS = "".join(tuple(ascii_lowercase)) + "".join(tuple(ascii_uppercase))
@@ -91,10 +91,8 @@ class Lexer:
         identifier_string = ""
 
         if self.__character_list:
-
             # iterating through all the chacters present in the input string list
             for character in self.__character_list:
-
                 # skipping the whitespace characters
                 if character in WHITESPACE:
                     continue
@@ -128,7 +126,6 @@ class Lexer:
 
                 # checking if current character is one of the allowed operand characters:
                 elif character in ALLOWED_OPERATORS.keys():
-
                     # checking if alphabets are present in the number string.
                     # If yes, append the identifier token to the token list and assign empty string to the identifier_string variable.
                     if identifier_string:
