@@ -15,7 +15,7 @@ def factorial(f1: int):
         return "No factorial for negative numbers"
 
 
-def sin_function(s1=int):
+def sin_function(s1: int):
     sin_ans1 = (s1 % 360) * 3.1415 / 180
     sin_ans2 = sin_ans1
     for i in range(1, 20):
@@ -27,7 +27,7 @@ def sin_function(s1=int):
     return round(sin_ans2, 4)
 
 
-def cos_function(s1=int):
+def cos_function(s1: int):
     cos_ans1 = (s1 % 360) * 3.1415 / 180
     cos_ans2 = 1
     for i in range(1, 20):
