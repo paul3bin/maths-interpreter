@@ -1,5 +1,5 @@
 """
-Author:      Max James
+Author:      Max James, Ebin Paul
 
 Date:        10/01/23
 
@@ -51,8 +51,14 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtGui import QIcon, QPixmap
-from PyQt5.QtWidgets import (QApplication, QLabel, QMainWindow, QTableWidget,
-                             QVBoxLayout, QWidget)
+from PyQt5.QtWidgets import (
+    QApplication,
+    QLabel,
+    QMainWindow,
+    QTableWidget,
+    QVBoxLayout,
+    QWidget,
+)
 
 from core.interpreter import Interpreter
 from core.lexer.lexicalAnalyzer import Lexer
@@ -62,7 +68,6 @@ from zero_crossing import bisection_method
 
 class PlotWindow:
     def __init__(self, function):
-
         function = function.split("|")
 
         # linearly spaced numbers from 'function[1]' to 'function[2]'
@@ -76,11 +81,9 @@ class PlotWindow:
         for i in range(len(x)):
             string_build = ""  # builds string that's read into interpreter
             for z in range(len(__tokens)):  # for every token in string
-
                 if (
                     __tokens[z].type == TokenType.IDENTIFIER
                 ):  # if token is an identifier
-
                     if __tokens[z].value != "x":  # if identifier is 'x'
                         # replace with variable value
                         string_build = (
@@ -319,7 +322,6 @@ class LoadWindow(QtWidgets.QWidget):
 
 
 class VariableWindow(QtWidgets.QWidget):
-
     switch_window = QtCore.pyqtSignal(str)
 
     def __init__(self):
@@ -374,7 +376,6 @@ class VariableWindow(QtWidgets.QWidget):
 
 
 class MainWindow(QtWidgets.QWidget):
-
     switch_window = QtCore.pyqtSignal()
     switch_window2 = QtCore.pyqtSignal()
     switch_window3 = QtCore.pyqtSignal()
@@ -632,7 +633,6 @@ class MainWindow(QtWidgets.QWidget):
                         __tokens[0].type == TokenType.IDENTIFIER
                         and __tokens[1].type == TokenType.ASSIGN
                     ):
-
                         cursor2.insertText(str(Interpreter(line).execute()) + "\n")
 
                         if __tokens[0].value not in list(self.varDict.keys()):
@@ -721,11 +721,8 @@ class MainWindow(QtWidgets.QWidget):
         self.switch_window4.emit()
 
     def eventFilter(self, obj, event):
-
         if event.type() == QtCore.QEvent.KeyPress and obj is self.outputBox:
-
             if event.key() == QtCore.Qt.Key_Backspace and self.outputBox.hasFocus():
-
                 if self.savedPlainText.strip() == self.outputBox.toPlainText().strip():
                     cursor = QtGui.QTextCursor(self.outputBox.document())
                     cursor.beginEditBlock()
@@ -769,7 +766,6 @@ class MainWindow(QtWidgets.QWidget):
                                 __tokens[0].type == TokenType.IDENTIFIER
                                 and __tokens[1].type == TokenType.ASSIGN
                             ):
-
                                 # if not already in dictionary keys:
                                 if __tokens[0].value not in list(self.varDict.keys()):
                                     self.varDependencies[__tokens[0].value] = []
@@ -793,7 +789,6 @@ class MainWindow(QtWidgets.QWidget):
                                 ] = line  # stores the assignment line of variable
 
                                 for i in range(len(__tokens[2:])):
-
                                     # i+2 to not include the identifier at the start of assignment
                                     if (
                                         TokenType.IDENTIFIER == __tokens[i + 2].type
@@ -845,7 +840,6 @@ class MainWindow(QtWidgets.QWidget):
 
 
 class Controller:
-
     outputBoxText = ">> "
     inputBoxText = ""
     pos = 0
@@ -857,7 +851,6 @@ class Controller:
         pass
 
     def show_main(self, text=">> "):
-
         # Closing sub-windows if they're open
         try:
             self.window.close()
@@ -931,7 +924,6 @@ class Controller:
         self.pinputWin.show()
 
     def show_plot(self, text):
-
         self.outputBoxText = self.main.savedPlainText
         self.inputBoxText = self.main.scriptBox.toPlainText()
         self.pos = self.main.firstPos
